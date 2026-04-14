@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Toast from "@/components/Toast";
+import { useChat } from "@/components/ChatProvider";
 
 const TABS = ["Activities", "Rewards", "Announcements"];
 
@@ -18,6 +19,8 @@ const TRIVIA_OPTIONS = ["1. D6", "2. C6", "3. A5", "4. Bb4"];
 const CORRECT_ANSWER = "1. D6";
 
 export default function InteractiveLanding() {
+  const { openChat } = useChat();
+
   // ── State ──
   const [activeTab, setActiveTab] = useState(0);
   const [howItWorksSlide, setHowItWorksSlide] = useState(0);
@@ -116,11 +119,11 @@ export default function InteractiveLanding() {
               ))}
             </div>
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              <Link href="/chat" className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-muted hover:text-brand rounded-lg hover:bg-surface2 transition">
+              <button onClick={openChat} className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-muted hover:text-brand rounded-lg hover:bg-surface2 transition">
                 <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                 <span className="hidden sm:inline">Chat Rooms</span>
                 <span className="badge text-[10px]">4</span>
-              </Link>
+              </button>
               <div className="hidden sm:flex -space-x-2">
                 {["bg-brand","bg-lavender-400","bg-pink"].map((c,i) => <div key={i} className={`h-8 w-8 rounded-full ${c} ring-2 ring-white`} />)}
               </div>

@@ -1,0 +1,439 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useChat } from "@/components/ChatProvider";
+
+/* ─── Room data ─── */
+const ROOMS = [
+  { id: 1, name: "EJAE Official Fan Club", members: 89, online: 12, color: "bg-brand" },
+  { id: 2, name: "Stan Club", members: 45, online: 8, color: "bg-lavender-400" },
+  { id: 3, name: "New Music Discussion", members: 34, online: 5, color: "bg-brand-400" },
+  { id: 4, name: "Concert Meetups", members: 28, online: 3, color: "bg-lavender-500" },
+];
+
+const TOTAL_ONLINE = ROOMS.reduce((sum, r) => sum + r.online, 0);
+
+/* ─── Demo users ─── */
+const DEMO_USERS = [
+  { name: "Jacques", color: "bg-purple-500" },
+  { name: "Lauren", color: "bg-pink-400" },
+  { name: "Kristine", color: "bg-amber-500" },
+  { name: "Marco", color: "bg-emerald-500" },
+  { name: "Alex", color: "bg-sky-500" },
+  { name: "Jenny", color: "bg-rose-400" },
+  { name: "Devon", color: "bg-indigo-400" },
+  { name: "Talia", color: "bg-teal-400" },
+];
+
+/* ─── Per-room seed messages ─── */
+const ROOM_MESSAGES = {
+  1: [
+    { user: "Jacques", body: "EJAE's new track is absolutely fire. Been playing Time After Time on repeat all day", minutesAgo: 38 },
+    { user: "Lauren", body: "The harmonies on track 3 of the EP are unreal. She really outdid herself", minutesAgo: 28 },
+    { user: "Kristine", body: "I love how she interacts with fans on here. Feels like a real community", minutesAgo: 18 },
+    { user: "Marco", body: "Anyone else notice the hidden sample in Midnight Drive? Genius production", minutesAgo: 10 },
+    { user: "Alex", body: "Welcome to all the new members! You picked the best fan club to join", minutesAgo: 4 },
+  ],
+  2: [
+    { user: "Jenny", body: "Stan check! Who else has listened to the full discography this week?", minutesAgo: 45 },
+    { user: "Devon", body: "Guilty. I made a 6-hour playlist of every EJAE feature and solo track", minutesAgo: 35 },
+    { user: "Talia", body: "Does anyone have the fan art from last week's contest? I missed the deadline", minutesAgo: 22 },
+    { user: "Lauren", body: "I'll post it in a bit! The winner's piece was incredible", minutesAgo: 15 },
+    { user: "Jacques", body: "We should organize a group stream party for the next single drop", minutesAgo: 6 },
+  ],
+  3: [
+    { user: "Marco", body: "What do you all think about the new wave of R&B coming out this year?", minutesAgo: 50 },
+    { user: "Alex", body: "It's great but EJAE is still in a league of her own. The vocal control is unmatched", minutesAgo: 40 },
+    { user: "Kristine", body: "I've been getting into jazz-influenced R&B lately. Any recommendations?", minutesAgo: 25 },
+    { user: "Devon", body: "Check out the latest EP from Moonchild! Similar vibes to EJAE's earlier stuff", minutesAgo: 16 },
+    { user: "Talia", body: "The bridge on Midnight Drive blends jazz chords so smoothly. That key change is chef's kiss", minutesAgo: 7 },
+  ],
+  4: [
+    { user: "Lauren", body: "Is anyone going to the LA show in June? I'm trying to get a group together!", minutesAgo: 55 },
+    { user: "Jacques", body: "Count me in! I went to the last one and it was the best concert I've ever been to", minutesAgo: 42 },
+    { user: "Jenny", body: "I'm flying in from Chicago! Would love to meet up with other fans beforehand", minutesAgo: 30 },
+    { user: "Marco", body: "We should get matching fan shirts made. I know someone who does custom prints", minutesAgo: 18 },
+    { user: "Alex", body: "Just snagged floor seats from the leaderboard reward. See you all there!", minutesAgo: 5 },
+  ],
+};
+
+const AUTO_REPLIES = [
+  "Welcome!",
+  "That's awesome!",
+  "Love that energy!",
+  "So true!!",
+  "Haha yes",
+  "Big facts",
+  "Couldn't agree more!",
+  "You're gonna love it here",
+  "W take honestly",
+  "Yesss let's gooo!",
+  "Real ones know",
+  "This community is the best fr",
+];
+
+function getUserByName(name) {
+  return DEMO_USERS.find((u) => u.name === name) || DEMO_USERS[0];
+}
+
+function formatRelativeTime(minutesAgo) {
+  if (minutesAgo < 1) return "just now";
+  if (minutesAgo === 1) return "1m ago";
+  if (minutesAgo < 60) return `${Math.floor(minutesAgo)}m ago`;
+  const hours = Math.floor(minutesAgo / 60);
+  if (hours === 1) return "1h ago";
+  return `${hours}h ago`;
+}
+
+/* ═══════════════════════════════════════════
+   ChatDrawer Component
+   ═══════════════════════════════════════════ */
+export default function ChatDrawer() {
+  const { isOpen, openChat, closeChat } = useChat();
+  const [activeRoom, setActiveRoom] = useState(null); // null = room list, number = room id
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roomMessages, setRoomMessages] = useState({}); // { [roomId]: Message[] }
+  const [body, setBody] = useState("");
+  const [viewTransition, setViewTransition] = useState("list"); // "list" | "chat"
+  const listRef = useRef(null);
+  const replyTimeoutRef = useRef(null);
+  const inputRef = useRef(null);
+
+  /* ── Initialize messages for all rooms on mount ── */
+  useEffect(() => {
+    const now = Date.now();
+    const initial = {};
+    for (const [roomId, seeds] of Object.entries(ROOM_MESSAGES)) {
+      initial[roomId] = seeds.map((m, i) => ({
+        id: `seed-${roomId}-${i}`,
+        body: m.body,
+        userName: m.user,
+        isGuest: false,
+        createdAt: now - m.minutesAgo * 60 * 1000,
+      }));
+    }
+    setRoomMessages(initial);
+  }, []);
+
+  /* ── Scroll to bottom when messages change ── */
+  useEffect(() => {
+    if (activeRoom && listRef.current) {
+      listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+    }
+  }, [activeRoom, roomMessages]);
+
+  /* ── Cleanup reply timeout ── */
+  useEffect(() => {
+    return () => {
+      if (replyTimeoutRef.current) clearTimeout(replyTimeoutRef.current);
+    };
+  }, []);
+
+  /* ── Focus input when entering a room ── */
+  useEffect(() => {
+    if (activeRoom && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 350);
+    }
+  }, [activeRoom]);
+
+  /* ── Enter a room ── */
+  const enterRoom = useCallback((roomId) => {
+    setViewTransition("chat");
+    setActiveRoom(roomId);
+    setBody("");
+  }, []);
+
+  /* ── Back to room list ── */
+  const backToList = useCallback(() => {
+    setViewTransition("list");
+    setActiveRoom(null);
+    setSearchQuery("");
+  }, []);
+
+  /* ── Send message ── */
+  const send = useCallback(
+    (e) => {
+      e.preventDefault();
+      const text = body.trim();
+      if (!text || !activeRoom) return;
+
+      const guestMsg = {
+        id: `guest-${Date.now()}`,
+        body: text,
+        userName: "You",
+        isGuest: true,
+        createdAt: Date.now(),
+      };
+      setRoomMessages((prev) => ({
+        ...prev,
+        [activeRoom]: [...(prev[activeRoom] || []), guestMsg],
+      }));
+      setBody("");
+
+      // Auto-reply after 2-3 seconds
+      const delay = 2000 + Math.random() * 1000;
+      replyTimeoutRef.current = setTimeout(() => {
+        const replyUser = DEMO_USERS[Math.floor(Math.random() * DEMO_USERS.length)];
+        const replyText = AUTO_REPLIES[Math.floor(Math.random() * AUTO_REPLIES.length)];
+        setRoomMessages((prev) => ({
+          ...prev,
+          [activeRoom]: [
+            ...(prev[activeRoom] || []),
+            {
+              id: `reply-${Date.now()}`,
+              body: replyText,
+              userName: replyUser.name,
+              isGuest: false,
+              createdAt: Date.now(),
+            },
+          ],
+        }));
+      }, delay);
+    },
+    [body, activeRoom]
+  );
+
+  /* ── Get timestamp ── */
+  function getTimestamp(createdAt) {
+    const minutesAgo = (Date.now() - createdAt) / 60000;
+    return formatRelativeTime(minutesAgo);
+  }
+
+  /* ── Filtered rooms ── */
+  const filteredRooms = ROOMS.filter((r) =>
+    r.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  /* ── Current room info ── */
+  const currentRoom = ROOMS.find((r) => r.id === activeRoom);
+  const currentMessages = activeRoom ? roomMessages[activeRoom] || [] : [];
+
+  return (
+    <>
+      {/* ── Floating Chat Button ── */}
+      {!isOpen && (
+        <button
+          onClick={openChat}
+          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-brand text-white shadow-card-lg hover:bg-brand-600 hover:shadow-glow grid place-items-center transition-all duration-200 active:scale-95"
+          aria-label="Open chat rooms"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+          </svg>
+          {/* Notification badge */}
+          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-rose-500 text-white text-[10px] font-bold grid place-items-center ring-2 ring-white">
+            4
+          </span>
+        </button>
+      )}
+
+      {/* ── Backdrop overlay ── */}
+      <div
+        onClick={closeChat}
+        className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        aria-hidden="true"
+      />
+
+      {/* ── Drawer panel ── */}
+      <div
+        className={`fixed top-0 right-0 z-[70] h-full w-full sm:w-[380px] bg-white shadow-card-lg flex flex-col transition-transform duration-300 ease-out ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* ─────── ROOM LIST VIEW ─────── */}
+        <div
+          className={`absolute inset-0 flex flex-col transition-all duration-300 ${
+            activeRoom !== null
+              ? "opacity-0 pointer-events-none -translate-x-8"
+              : "opacity-100 translate-x-0"
+          }`}
+        >
+          {/* Header */}
+          <div className="px-5 py-4 border-b border-border/60 flex items-center justify-between shrink-0">
+            <h2 className="font-display text-lg font-bold tracking-tight">CHAT ROOMS</h2>
+            <button
+              onClick={closeChat}
+              className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-brand transition"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+              CLOSE CHAT
+            </button>
+          </div>
+
+          {/* Online indicator */}
+          <div className="px-5 py-3 flex items-center gap-3 border-b border-border/30">
+            {/* Avatar stack */}
+            <div className="flex -space-x-2">
+              {["bg-brand", "bg-lavender-400", "bg-pink", "bg-amber-500"].map((c, i) => (
+                <div
+                  key={i}
+                  className={`h-8 w-8 rounded-full ${c} ring-2 ring-white grid place-items-center text-white text-[10px] font-bold`}
+                >
+                  {["J", "L", "K", "M"][i]}
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+              <span className="text-sm font-medium text-muted">{TOTAL_ONLINE} online</span>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="px-5 py-3 border-b border-border/30">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search for a chat room here...."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input pr-10 text-sm"
+              />
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg bg-brand text-white grid place-items-center hover:bg-brand-600 transition">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Room list */}
+          <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+            {filteredRooms.map((room) => (
+              <button
+                key={room.id}
+                onClick={() => enterRoom(room.id)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-brand-50/60 hover:bg-brand-50 border border-brand/10 transition-all duration-200 group hover:shadow-sm"
+              >
+                {/* Room avatar */}
+                <div
+                  className={`h-10 w-10 rounded-full ${room.color} grid place-items-center text-white font-bold text-sm shrink-0`}
+                >
+                  {room.name[0]}
+                </div>
+                {/* Room info */}
+                <div className="flex-1 text-left min-w-0">
+                  <div className="font-display font-semibold text-sm text-text truncate">
+                    {room.name}
+                  </div>
+                  <div className="text-[11px] text-muted mt-0.5">
+                    {room.members} members &middot;{" "}
+                    <span className="text-success">{room.online} online</span>
+                  </div>
+                </div>
+                {/* Chevron */}
+                <svg
+                  className="h-4 w-4 text-muted group-hover:text-brand transition shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            ))}
+
+            {filteredRooms.length === 0 && (
+              <div className="text-center py-8 text-sm text-muted">No rooms match your search.</div>
+            )}
+          </div>
+        </div>
+
+        {/* ─────── CHAT VIEW ─────── */}
+        <div
+          className={`absolute inset-0 flex flex-col transition-all duration-300 ${
+            activeRoom !== null
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 pointer-events-none translate-x-8"
+          }`}
+        >
+          {/* Chat header */}
+          <div className="px-4 py-3.5 border-b border-border/60 flex items-center gap-3 shrink-0">
+            <button
+              onClick={backToList}
+              className="h-8 w-8 rounded-lg hover:bg-surface2 grid place-items-center text-muted hover:text-brand transition shrink-0"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <div className="flex-1 min-w-0">
+              <div className="font-display font-semibold text-sm truncate">
+                {currentRoom?.name || "Chat"}
+              </div>
+              <div className="text-[11px] text-muted">
+                {currentRoom?.members} members &middot;{" "}
+                <span className="text-success">{currentRoom?.online} online</span>
+              </div>
+            </div>
+            <span className="chip text-[10px] py-0.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              live
+            </span>
+          </div>
+
+          {/* Messages */}
+          <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 bg-bg/50">
+            {currentMessages.map((m) => {
+              const isMe = m.isGuest;
+              const user = isMe ? null : getUserByName(m.userName);
+              const name = isMe ? "You" : m.userName;
+              return (
+                <div key={m.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
+                  <div
+                    className={`h-7 w-7 shrink-0 rounded-full grid place-items-center text-white text-[10px] font-bold ${
+                      isMe ? "bg-brand" : user?.color || "bg-lavender-400"
+                    }`}
+                  >
+                    {name[0]?.toUpperCase() || "?"}
+                  </div>
+                  <div className={`max-w-[78%] ${isMe ? "text-right" : ""}`}>
+                    <div className="flex items-baseline gap-1.5 mb-0.5">
+                      <span className={`text-[11px] font-medium ${isMe ? "text-brand" : "text-muted"}`}>
+                        {name}
+                      </span>
+                      <span className="text-[9px] text-muted/50">{getTimestamp(m.createdAt)}</span>
+                    </div>
+                    <div
+                      className={`inline-block rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
+                        isMe
+                          ? "bg-brand text-white rounded-br-md"
+                          : "bg-white border border-border/60 rounded-bl-md shadow-sm"
+                      }`}
+                    >
+                      {m.body}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Message input */}
+          <form onSubmit={send} className="border-t border-border/60 p-3 flex gap-2 shrink-0 bg-white">
+            <input
+              ref={inputRef}
+              className="input flex-1 text-sm"
+              placeholder="Say something..."
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+            <button
+              disabled={!body.trim()}
+              className="btn-primary px-4 py-2.5 disabled:opacity-40 disabled:shadow-none"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+}
