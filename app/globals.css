@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  background: #0B0B10;
+  color: #F5F5FA;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60;
+  }
+  .btn-primary { @apply btn bg-brand text-black hover:bg-brand-600; }
+  .btn-secondary { @apply btn bg-surface2 text-text hover:bg-border border border-border; }
+  .btn-ghost { @apply btn text-muted hover:text-text hover:bg-surface2; }
+
+  .card {
+    @apply rounded-2xl bg-surface border border-border shadow-card;
+  }
+  .input {
+    @apply w-full rounded-xl bg-surface2 border border-border px-3.5 py-2.5 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/60;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface2 px-3 py-1 text-xs text-muted;
+  }
+  .section-title {
+    @apply font-display text-2xl font-semibold tracking-tight;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #262633; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #2e2e40; }
