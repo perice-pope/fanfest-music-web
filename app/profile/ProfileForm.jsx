@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import AvatarUpload from "@/components/AvatarUpload";
 
-export default function ProfileForm({ initialProfile, email }) {
+export default function ProfileForm({ initialProfile, email, userId }) {
   const [displayName, setDisplayName] = useState(initialProfile?.display_name || "");
   const [avatarUrl, setAvatarUrl] = useState(initialProfile?.avatar_url || "");
   const [msg, setMsg] = useState(null);
@@ -12,33 +13,49 @@ export default function ProfileForm({ initialProfile, email }) {
     e.preventDefault();
     setSaving(true); setMsg(null);
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from("profiles").upsert({
-      id: user.id,
+      id: userId,
       display_name: displayName,
       avatar_url: avatarUrl || null,
     });
     setSaving(false);
-    setMsg(error ? `Error: ${error.message}` : "Saved.");
+    setMsg(error ? `Error: ${error.message}` : "Saved!");
+    if (!error) {
+      setTimeout(() => setMsg(null), 3000);
+    }
   }
 
   return (
-    <form onSubmit={save} className="space-y-3">
-      <label className="block">
-        <span className="text-xs text-muted">Email</span>
-        <input readOnly value={email} className="input mt-1 opacity-70" />
-      </label>
-      <label className="block">
-        <span className="text-xs text-muted">Display name</span>
-        <input className="input mt-1" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-      </label>
-      <label className="block">
-        <span className="text-xs text-muted">Avatar URL</span>
-        <input className="input mt-1" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://…" />
-      </label>
-      <div className="flex items-center gap-3">
-        <button disabled={saving} className="btn-primary">{saving ? "Saving…" : "Save changes"}</button>
-        {msg && <span className="text-sm text-muted">{msg}</span>}
+    <form onSubmit={save} className="space-y-6">
+      {/* Avatar upload */}
+      <div className="flex justify-center py-2">
+        <AvatarUpload
+          userId={userId}
+          currentUrl={avatarUrl}
+          onUploaded={(url) => setAvatarUrl(url)}
+        />
+      </div>
+
+      <div className="space-y-4">
+        <label className="block">
+          <span className="text-sm text-muted font-medium">Email</span>
+          <input readOnly value={email} className="input mt-1.5 opacity-60 cursor-not-allowed" />
+        </label>
+        <label className="block">
+          <span className="text-sm text-muted font-medium">Display name</span>
+          <input className="input mt-1.5" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="How fans see you" />
+        </label>
+      </div>
+
+      <div className="flex items-center gap-3 pt-2">
+        <button disabled={saving} className="btn-primary px-6">
+          {saving ? "Saving..." : "Save changes"}
+        </button>
+        {msg && (
+          <span className={`text-sm font-medium ${msg.startsWith("Error") ? "text-red-400" : "text-success"}`}>
+            {msg}
+          </span>
+        )}
       </div>
     </form>
   );

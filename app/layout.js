@@ -9,8 +9,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-bg text-text font-sans antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-bg text-text font-sans antialiased selection:bg-brand/20 selection:text-brand-700">
         {children}
       </body>
     </html>

@@ -6,26 +6,35 @@ export default async function Navbar() {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-bg/80 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-brand grid place-items-center text-black font-black">F</div>
-          <span className="font-display text-lg font-semibold tracking-tight">FansFest</span>
+    <header className="sticky top-0 z-50 bg-gradient-nav text-white shadow-lg">
+      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="h-8 w-8 rounded-lg bg-white/10 backdrop-blur grid place-items-center text-white font-black text-sm border border-white/20">
+            F
+          </div>
+          <span className="font-display text-lg font-bold tracking-tight">FansFest</span>
         </Link>
+
         <div className="hidden md:flex items-center gap-1">
-          <Link href="/chat" className="btn-ghost">Chat</Link>
-          <Link href="/dashboard" className="btn-ghost">Dashboard</Link>
-          <Link href="/profile" className="btn-ghost">Profile</Link>
+          <Link href="/dashboard" className="px-3 py-1.5 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition">Dashboard</Link>
+          <Link href="/chat" className="px-3 py-1.5 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition">Chat</Link>
+          <Link href="/profile" className="px-3 py-1.5 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition">Profile</Link>
         </div>
+
         <div className="flex items-center gap-2">
           {user ? (
-            <form action="/auth/signout" method="post">
-              <button className="btn-secondary">Sign out</button>
-            </form>
+            <>
+              <Link href="/dashboard" className="md:hidden px-2 py-1.5 text-white/70 hover:text-white transition">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" /></svg>
+              </Link>
+              <form action="/auth/signout" method="post">
+                <button className="text-sm font-medium px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 hover:bg-white/20 transition">Sign out</button>
+              </form>
+            </>
           ) : (
             <>
-              <Link href="/login" className="btn-ghost hidden sm:inline-flex">Sign in</Link>
-              <Link href="/signup" className="btn-primary">Join</Link>
+              <Link href="/login" className="hidden sm:inline-flex text-sm font-medium text-white/70 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 transition">Sign in</Link>
+              <Link href="/signup" className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-white text-brand-700 hover:bg-white/90 transition shadow-sm">Join</Link>
             </>
           )}
         </div>

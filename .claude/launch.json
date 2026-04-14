@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Next.js Dev Server",
+      "runtimeExecutable": "/Users/pericepope/.nvm/versions/node/v20.19.5/bin/node",
+      "runtimeArgs": ["node_modules/.bin/next", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Next.js Production Server",
+      "runtimeExecutable": "/Users/pericepope/.nvm/versions/node/v20.19.5/bin/node",
+      "runtimeArgs": ["node_modules/.bin/next", "start"],
+      "port": 3000
+    }
+  ]
+}

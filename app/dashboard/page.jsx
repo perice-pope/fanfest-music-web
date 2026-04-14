@@ -1,6 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getValidAccessToken, spotifyFetch } from "@/lib/spotify";
 
@@ -11,131 +14,173 @@ async function loadSpotify(userId) {
     const service = createServiceClient();
     const tokens = await getValidAccessToken(service, userId);
     if (!tokens) return { connected: false };
-    const [me, topArtists, topTracks] = await Promise.all([
+    const [me, topArtists, topTracks, recent] = await Promise.all([
       spotifyFetch("/me", tokens.access_token),
       spotifyFetch("/me/top/artists?limit=6&time_range=short_term", tokens.access_token),
       spotifyFetch("/me/top/tracks?limit=6&time_range=short_term", tokens.access_token),
+      spotifyFetch("/me/player/recently-played?limit=8", tokens.access_token).catch(() => ({ items: [] })),
     ]);
-    return { connected: true, me, topArtists: topArtists.items, topTracks: topTracks.items };
+    return { connected: true, me, topArtists: topArtists.items, topTracks: topTracks.items, recent: recent.items || [] };
   } catch (e) {
     return { connected: true, error: e.message };
   }
+}
+
+function SpotifyCard({ children, className = "" }) {
+  return <div className={`card p-5 ${className}`}>{children}</div>;
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+async function DashboardContent({ userId, searchParams }) {
+  const supabase = createClient();
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  const sp = await loadSpotify(userId);
+
+  return (
+    <>
+      {searchParams?.spotify === "connected" && (
+        <div className="rounded-xl bg-green-50 border border-green-200 p-4 mb-6 flex items-center gap-3">
+          <svg className="h-5 w-5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+          <span className="text-sm text-green-700">Spotify connected successfully!</span>
+        </div>
+      )}
+      {searchParams?.spotify_error && (
+        <div className="rounded-xl bg-red-50 border border-red-200 p-4 mb-6">
+          <span className="text-sm text-red-600">Spotify error: {searchParams.spotify_error}</span>
+        </div>
+      )}
+
+      {!sp.connected ? (
+        <div className="card p-10 text-center">
+          <div className="h-16 w-16 mx-auto rounded-2xl bg-brand-50 grid place-items-center text-brand">
+            <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.8.8 0 01-1.1.3c-3-1.8-6.8-2.2-11.3-1.2a.8.8 0 11-.3-1.5c4.9-1.1 9.1-.6 12.4 1.3.4.2.5.7.3 1.1zm1.2-2.7a1 1 0 01-1.3.3c-3.5-2.1-8.7-2.7-12.8-1.5a1 1 0 01-.6-1.9c4.6-1.4 10.4-.7 14.4 1.7.5.3.6.9.3 1.4zm.1-2.8C14 8.6 7.6 8.4 3.8 9.5a1.2 1.2 0 11-.7-2.3C7.6 5.9 14.7 6.1 19.1 8.7a1.2 1.2 0 01-1.2 2.2z"/></svg>
+          </div>
+          <h2 className="font-display text-2xl font-bold mt-5">Connect Spotify</h2>
+          <p className="text-muted text-sm mt-2 max-w-md mx-auto">Pull your top artists, top tracks, and recently played into your FansFest dashboard.</p>
+          <Link href="/api/spotify/connect" className="btn-primary mt-6 px-6 py-3 text-base inline-flex">Connect Spotify</Link>
+        </div>
+      ) : sp.error ? (
+        <div className="card p-6">
+          <div className="text-sm text-red-600">Could not load Spotify data: {sp.error}</div>
+          <Link href="/api/spotify/connect" className="btn-secondary mt-3 inline-flex">Reconnect</Link>
+        </div>
+      ) : (
+        <div className="space-y-5 animate-fade-in">
+          <div className="grid md:grid-cols-[1fr_auto] gap-4">
+            <SpotifyCard className="flex items-center gap-4">
+              {sp.me.images?.[0]?.url ? (
+                <Image src={sp.me.images[0].url} alt="" width={56} height={56} className="h-14 w-14 rounded-full object-cover ring-2 ring-brand/20" />
+              ) : (
+                <div className="h-14 w-14 rounded-full bg-brand grid place-items-center text-white font-bold text-xl">{sp.me.display_name?.[0]?.toUpperCase() || "?"}</div>
+              )}
+              <div>
+                <div className="font-display font-bold text-lg">{sp.me.display_name}</div>
+                <div className="text-xs text-muted flex items-center gap-2">
+                  <span className="chip text-[10px] py-0.5 px-2 bg-[#1DB954]/10 border-[#1DB954]/20 text-[#1DB954]">Spotify</span>
+                  {sp.me.followers?.total ?? 0} followers &middot; {sp.me.country}
+                </div>
+              </div>
+            </SpotifyCard>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="card p-4 text-center"><div className="text-xs text-muted font-medium">Top Artists</div><div className="font-display text-xl font-bold">{sp.topArtists.length}</div></div>
+              <div className="card p-4 text-center"><div className="text-xs text-muted font-medium">Recent</div><div className="font-display text-xl font-bold">{sp.recent.length}</div></div>
+            </div>
+          </div>
+
+          <SpotifyCard>
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-display font-semibold">Top Artists</div>
+              <span className="chip text-[10px]">short term</span>
+            </div>
+            {sp.topArtists.length === 0 ? (
+              <div className="text-sm text-muted py-4 text-center">No listening history yet.</div>
+            ) : (
+              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {sp.topArtists.map(a => (
+                  <li key={a.id} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border/40 p-2.5 hover:border-brand/30 transition-colors">
+                    {a.images?.[0]?.url ? <Image src={a.images[0].url} alt="" width={40} height={40} className="h-10 w-10 rounded-lg object-cover" /> : <div className="h-10 w-10 rounded-lg bg-lavender-100 grid place-items-center text-muted text-xs">?</div>}
+                    <div className="min-w-0"><div className="text-sm font-semibold truncate">{a.name}</div><div className="text-xs text-muted truncate">{a.genres?.[0] || "Artist"}</div></div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SpotifyCard>
+
+          <SpotifyCard>
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-display font-semibold">Top Tracks</div>
+              <span className="chip text-[10px]">short term</span>
+            </div>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {sp.topTracks.map(t => (
+                <li key={t.id} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border/40 p-2.5 hover:border-brand/30 transition-colors">
+                  {t.album?.images?.[0]?.url ? <Image src={t.album.images[0].url} alt="" width={40} height={40} className="h-10 w-10 rounded-lg object-cover" /> : <div className="h-10 w-10 rounded-lg bg-lavender-100 grid place-items-center text-muted text-xs">?</div>}
+                  <div className="min-w-0"><div className="text-sm font-semibold truncate">{t.name}</div><div className="text-xs text-muted truncate">{t.artists.map(a => a.name).join(", ")}</div></div>
+                </li>
+              ))}
+            </ul>
+          </SpotifyCard>
+
+          {sp.recent.length > 0 && (
+            <SpotifyCard>
+              <div className="flex items-center justify-between mb-4">
+                <div className="font-display font-semibold">Recently Played</div>
+                <span className="chip text-[10px]"><svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>live</span>
+              </div>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {sp.recent.map((r, i) => (
+                  <li key={`${r.track.id}-${i}`} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border/40 p-2.5 hover:border-brand/30 transition-colors">
+                    {r.track.album?.images?.[0]?.url ? <Image src={r.track.album.images[0].url} alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-cover" /> : <div className="h-11 w-11 rounded-lg bg-lavender-100 grid place-items-center text-muted text-xs">?</div>}
+                    <div className="min-w-0 flex-1"><div className="text-sm font-semibold truncate">{r.track.name}</div><div className="text-xs text-muted truncate">{r.track.artists.map(a => a.name).join(", ")}</div></div>
+                    <div className="text-[10px] text-muted/60 shrink-0">{timeAgo(r.played_at)}</div>
+                  </li>
+                ))}
+              </ul>
+            </SpotifyCard>
+          )}
+        </div>
+      )}
+    </>
+  );
 }
 
 export default async function DashboardPage({ searchParams }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
-  const sp = await loadSpotify(user.id);
 
   return (
     <>
       <Navbar />
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
         <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
           <div>
             <div className="text-sm text-muted">Welcome back</div>
-            <h1 className="font-display text-3xl font-semibold">
-              {profile?.display_name || user.email}
-            </h1>
+            <h1 className="font-display text-3xl font-bold">{profile?.display_name || user.email}</h1>
           </div>
           <div className="flex gap-2">
-            <Link href="/chat" className="btn-secondary">Open chat</Link>
-            {!sp.connected ? (
-              <Link href="/api/spotify/connect" className="btn-primary">Connect Spotify</Link>
-            ) : (
-              <Link href="/api/spotify/connect" className="btn-secondary">Reconnect Spotify</Link>
-            )}
+            <Link href="/chat" className="btn-secondary">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+              Chat
+            </Link>
+            <Link href="/api/spotify/connect" className="btn-primary">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.8.8 0 01-1.1.3c-3-1.8-6.8-2.2-11.3-1.2a.8.8 0 11-.3-1.5c4.9-1.1 9.1-.6 12.4 1.3.4.2.5.7.3 1.1zm1.2-2.7a1 1 0 01-1.3.3c-3.5-2.1-8.7-2.7-12.8-1.5a1 1 0 01-.6-1.9c4.6-1.4 10.4-.7 14.4 1.7.5.3.6.9.3 1.4z"/></svg>
+              Connect Spotify
+            </Link>
           </div>
         </div>
-
-        {searchParams?.spotify === "connected" && (
-          <div className="card p-4 mb-6 border-brand/40">
-            <div className="text-sm">🎧 Spotify connected successfully.</div>
-          </div>
-        )}
-        {searchParams?.spotify_error && (
-          <div className="card p-4 mb-6 border-red-500/40">
-            <div className="text-sm text-red-400">Spotify error: {searchParams.spotify_error}</div>
-          </div>
-        )}
-
-        {!sp.connected ? (
-          <div className="card p-8 text-center">
-            <div className="h-12 w-12 mx-auto rounded-xl bg-brand/15 text-brand grid place-items-center font-black">♪</div>
-            <h2 className="font-display text-xl font-semibold mt-4">Connect Spotify</h2>
-            <p className="text-muted text-sm mt-1 max-w-md mx-auto">
-              Pull your top artists, top tracks and listening activity into your FansFest profile.
-            </p>
-            <Link href="/api/spotify/connect" className="btn-primary mt-5 inline-flex">Connect Spotify</Link>
-          </div>
-        ) : sp.error ? (
-          <div className="card p-6">
-            <div className="text-sm text-red-400">Couldn't load Spotify data: {sp.error}</div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="card p-5">
-              <div className="flex items-center gap-4">
-                {sp.me.images?.[0]?.url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={sp.me.images[0].url} alt="" className="h-14 w-14 rounded-full object-cover" />
-                )}
-                <div>
-                  <div className="text-sm text-muted">Spotify</div>
-                  <div className="font-display font-semibold text-lg">{sp.me.display_name}</div>
-                  <div className="text-xs text-muted">{sp.me.followers?.total ?? 0} followers · {sp.me.country}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="card p-5 md:col-span-2">
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-display font-semibold">Top artists</div>
-                <span className="chip">short term</span>
-              </div>
-              {sp.topArtists.length === 0 ? (
-                <div className="text-sm text-muted">No listening history yet.</div>
-              ) : (
-                <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {sp.topArtists.map(a => (
-                    <li key={a.id} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border p-2.5">
-                      {a.images?.[0]?.url && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={a.images[0].url} alt="" className="h-10 w-10 rounded-lg object-cover" />
-                      )}
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium truncate">{a.name}</div>
-                        <div className="text-xs text-muted truncate">{a.genres?.[0] || "—"}</div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="card p-5 md:col-span-3">
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-display font-semibold">Top tracks</div>
-                <span className="chip">short term</span>
-              </div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {sp.topTracks.map(t => (
-                  <li key={t.id} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border p-2.5">
-                    {t.album?.images?.[0]?.url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={t.album.images[0].url} alt="" className="h-10 w-10 rounded-lg object-cover" />
-                    )}
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium truncate">{t.name}</div>
-                      <div className="text-xs text-muted truncate">{t.artists.map(a => a.name).join(", ")}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
+        <Suspense fallback={<DashboardSkeleton />}>
+          <DashboardContent userId={user.id} searchParams={searchParams} />
+        </Suspense>
       </main>
       <Footer />
     </>

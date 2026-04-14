@@ -15,6 +15,13 @@ const icons = {
   ),
 };
 
+const colors = {
+  spotify: "group-hover:text-[#1DB954]",
+  instagram: "group-hover:text-[#E1306C]",
+  tiktok: "group-hover:text-text",
+  x: "group-hover:text-text",
+};
+
 export default function SocialLinkButton({ platform, href, label }) {
   const icon = icons[platform] || null;
   return (
@@ -22,18 +29,18 @@ export default function SocialLinkButton({ platform, href, label }) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-surface hover:bg-surface2 transition px-4 py-3.5 shadow-card"
+      className="group card-hover flex items-center justify-between gap-3 px-4 py-3.5"
     >
       <div className="flex items-center gap-3">
-        <span className="h-9 w-9 rounded-lg bg-surface2 grid place-items-center text-text group-hover:text-brand transition">
+        <span className={`h-10 w-10 rounded-xl bg-surface2 grid place-items-center text-muted ${colors[platform] || "group-hover:text-brand"} transition-colors`}>
           {icon}
         </span>
         <div>
-          <div className="text-sm font-medium capitalize">{label || platform}</div>
+          <div className="text-sm font-semibold capitalize">{label || platform}</div>
           <div className="text-xs text-muted">@fansfest</div>
         </div>
       </div>
-      <span className="text-muted group-hover:text-text transition">→</span>
+      <span className="text-muted group-hover:text-brand group-hover:translate-x-0.5 transition-all">&rarr;</span>
     </Link>
   );
 }
