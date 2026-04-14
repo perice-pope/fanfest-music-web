@@ -9,6 +9,37 @@ import { getValidAccessToken, spotifyFetch } from "@/lib/spotify";
 
 export const dynamic = "force-dynamic";
 
+/* ─── Demo / mock data ──────────────────────────────────────────────── */
+
+const DEMO_ARTISTS = [
+  { id: "d1", name: "Drake", genre: "Hip-Hop", color: "bg-amber-500" },
+  { id: "d2", name: "SZA", genre: "R&B", color: "bg-rose-500" },
+  { id: "d3", name: "The Weeknd", genre: "Pop", color: "bg-red-600" },
+  { id: "d4", name: "Doja Cat", genre: "Pop Rap", color: "bg-pink-500" },
+  { id: "d5", name: "Tyler the Creator", genre: "Hip-Hop", color: "bg-green-500" },
+  { id: "d6", name: "Steve Lacy", genre: "R&B", color: "bg-indigo-500" },
+];
+
+const DEMO_TRACKS = [
+  { id: "t1", name: "Snooze", artist: "SZA", color: "bg-rose-500" },
+  { id: "t2", name: "Blinding Lights", artist: "The Weeknd", color: "bg-red-600" },
+  { id: "t3", name: "Paint The Town Red", artist: "Doja Cat", color: "bg-pink-500" },
+  { id: "t4", name: "HUMBLE.", artist: "Kendrick Lamar", color: "bg-orange-600" },
+  { id: "t5", name: "Redbone", artist: "Childish Gambino", color: "bg-yellow-600" },
+  { id: "t6", name: "Bad Habit", artist: "Steve Lacy", color: "bg-indigo-500" },
+];
+
+const DEMO_RECENT = [
+  { id: "r1", name: "Snooze", artist: "SZA", color: "bg-rose-500", ago: "2m ago" },
+  { id: "r2", name: "Blinding Lights", artist: "The Weeknd", color: "bg-red-600", ago: "15m ago" },
+  { id: "r3", name: "Bad Habit", artist: "Steve Lacy", color: "bg-indigo-500", ago: "1h ago" },
+  { id: "r4", name: "HUMBLE.", artist: "Kendrick Lamar", color: "bg-orange-600", ago: "3h ago" },
+  { id: "r5", name: "Paint The Town Red", artist: "Doja Cat", color: "bg-pink-500", ago: "5h ago" },
+  { id: "r6", name: "Redbone", artist: "Childish Gambino", color: "bg-yellow-600", ago: "1d ago" },
+];
+
+/* ─── Helpers ────────────────────────────────────────────────────────── */
+
 async function loadSpotify(userId) {
   try {
     const service = createServiceClient();
@@ -39,6 +70,105 @@ function timeAgo(dateStr) {
   if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs / 24)}d ago`;
 }
+
+function LetterAvatar({ letter, colorClass, size = "h-10 w-10", textSize = "text-sm" }) {
+  return (
+    <div className={`${size} rounded-lg ${colorClass} grid place-items-center text-white font-bold ${textSize}`}>
+      {letter}
+    </div>
+  );
+}
+
+/* ─── Demo dashboard (no auth) ───────────────────────────────────────── */
+
+function DemoDashboard() {
+  return (
+    <div className="space-y-5 animate-fade-in">
+      {/* Demo banner */}
+      <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex items-center gap-3">
+        <svg className="h-5 w-5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        <span className="text-sm text-amber-800">
+          You&apos;re viewing demo data.{" "}
+          <Link href="/login" className="font-semibold underline underline-offset-2 hover:text-amber-900">
+            Sign in
+          </Link>{" "}
+          to connect your real Spotify.
+        </span>
+      </div>
+
+      {/* Profile card + stats */}
+      <div className="grid md:grid-cols-[1fr_auto] gap-4">
+        <SpotifyCard className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-full bg-brand grid place-items-center text-white font-bold text-xl">D</div>
+          <div>
+            <div className="font-display font-bold text-lg">Demo User</div>
+            <div className="text-xs text-muted flex items-center gap-2">
+              <span className="chip text-[10px] py-0.5 px-2 bg-[#1DB954]/10 border-[#1DB954]/20 text-[#1DB954]">Spotify</span>
+              42 followers &middot; US
+            </div>
+          </div>
+        </SpotifyCard>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="card p-4 text-center"><div className="text-xs text-muted font-medium">Top Artists</div><div className="font-display text-xl font-bold">6</div></div>
+          <div className="card p-4 text-center"><div className="text-xs text-muted font-medium">Recent</div><div className="font-display text-xl font-bold">6</div></div>
+        </div>
+      </div>
+
+      {/* Top Artists */}
+      <SpotifyCard>
+        <div className="flex items-center justify-between mb-4">
+          <div className="font-display font-semibold">Top Artists</div>
+          <span className="chip text-[10px]">short term</span>
+        </div>
+        <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {DEMO_ARTISTS.map(a => (
+            <li key={a.id} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border/40 p-2.5 hover:border-brand/30 transition-colors">
+              <LetterAvatar letter={a.name[0]} colorClass={a.color} />
+              <div className="min-w-0"><div className="text-sm font-semibold truncate">{a.name}</div><div className="text-xs text-muted truncate">{a.genre}</div></div>
+            </li>
+          ))}
+        </ul>
+      </SpotifyCard>
+
+      {/* Top Tracks */}
+      <SpotifyCard>
+        <div className="flex items-center justify-between mb-4">
+          <div className="font-display font-semibold">Top Tracks</div>
+          <span className="chip text-[10px]">short term</span>
+        </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {DEMO_TRACKS.map(t => (
+            <li key={t.id} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border/40 p-2.5 hover:border-brand/30 transition-colors">
+              <LetterAvatar letter={t.name[0]} colorClass={t.color} />
+              <div className="min-w-0"><div className="text-sm font-semibold truncate">{t.name}</div><div className="text-xs text-muted truncate">{t.artist}</div></div>
+            </li>
+          ))}
+        </ul>
+      </SpotifyCard>
+
+      {/* Recently Played */}
+      <SpotifyCard>
+        <div className="flex items-center justify-between mb-4">
+          <div className="font-display font-semibold">Recently Played</div>
+          <span className="chip text-[10px]"><svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>live</span>
+        </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {DEMO_RECENT.map(r => (
+            <li key={r.id} className="flex items-center gap-3 rounded-xl bg-surface2 border border-border/40 p-2.5 hover:border-brand/30 transition-colors">
+              <LetterAvatar letter={r.name[0]} colorClass={r.color} size="h-11 w-11" />
+              <div className="min-w-0 flex-1"><div className="text-sm font-semibold truncate">{r.name}</div><div className="text-xs text-muted truncate">{r.artist}</div></div>
+              <div className="text-[10px] text-muted/60 shrink-0">{r.ago}</div>
+            </li>
+          ))}
+        </ul>
+      </SpotifyCard>
+    </div>
+  );
+}
+
+/* ─── Authenticated dashboard content ────────────────────────────────── */
 
 async function DashboardContent({ userId, searchParams }) {
   const supabase = createClient();
@@ -153,10 +283,31 @@ async function DashboardContent({ userId, searchParams }) {
   );
 }
 
+/* ─── Page ───────────────────────────────────────────────────────────── */
+
 export default async function DashboardPage({ searchParams }) {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+
+  let user = null;
+  let profile = null;
+
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user ?? null;
+  } catch {
+    user = null;
+  }
+
+  if (user) {
+    try {
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      profile = data;
+    } catch {
+      profile = null;
+    }
+  }
+
+  const isDemo = !user;
 
   return (
     <>
@@ -165,7 +316,9 @@ export default async function DashboardPage({ searchParams }) {
         <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
           <div>
             <div className="text-sm text-muted">Welcome back</div>
-            <h1 className="font-display text-3xl font-bold">{profile?.display_name || user.email}</h1>
+            <h1 className="font-display text-3xl font-bold">
+              {isDemo ? "Demo User" : (profile?.display_name || user.email)}
+            </h1>
           </div>
           <div className="flex gap-2">
             <Link href="/chat" className="btn-secondary">
@@ -178,9 +331,14 @@ export default async function DashboardPage({ searchParams }) {
             </Link>
           </div>
         </div>
-        <Suspense fallback={<DashboardSkeleton />}>
-          <DashboardContent userId={user.id} searchParams={searchParams} />
-        </Suspense>
+
+        {isDemo ? (
+          <DemoDashboard />
+        ) : (
+          <Suspense fallback={<DashboardSkeleton />}>
+            <DashboardContent userId={user.id} searchParams={searchParams} />
+          </Suspense>
+        )}
       </main>
       <Footer />
     </>
