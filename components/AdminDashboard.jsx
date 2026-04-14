@@ -253,18 +253,18 @@ function FiltersSidebar({
         {/* Location */}
         <div>
           <div className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Location</div>
-          <div className="space-y-1.5">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.locationCountry}
-                onChange={() => updateFilter("locationCountry", !filters.locationCountry)}
-                className="h-4 w-4 rounded border-border text-brand focus:ring-brand/30 accent-brand cursor-pointer"
-              />
-              <span className="text-sm text-text group-hover:text-brand transition-colors">Country</span>
-            </label>
+          <label className="flex items-center gap-2 cursor-pointer group mb-2">
+            <input
+              type="checkbox"
+              checked={filters.locationCountry}
+              onChange={() => updateFilter("locationCountry", !filters.locationCountry)}
+              className="h-4 w-4 rounded border-border text-brand focus:ring-brand/30 accent-brand cursor-pointer"
+            />
+            <span className="text-sm text-text group-hover:text-brand transition-colors">Country (US)</span>
+          </label>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
             {STATES.map((st) => (
-              <label key={st} className="flex items-center gap-2 cursor-pointer group">
+              <label key={st} className="flex items-center gap-1.5 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={filters.states.includes(st)}
@@ -276,19 +276,19 @@ function FiltersSidebar({
                         : [...filters.states, st]
                     )
                   }
-                  className="h-4 w-4 rounded border-border text-brand focus:ring-brand/30 accent-brand cursor-pointer"
+                  className="h-3.5 w-3.5 rounded border-border text-brand focus:ring-brand/30 accent-brand cursor-pointer"
                 />
-                <span className="text-sm text-text group-hover:text-brand transition-colors">{st}</span>
+                <span className="text-xs text-text group-hover:text-brand transition-colors">{st}</span>
               </label>
             ))}
-            <input
-              type="text"
-              value={filters.zipSearch}
-              onChange={(e) => updateFilter("zipSearch", e.target.value)}
-              className="input text-xs mt-1"
-              placeholder="Search zip code..."
-            />
           </div>
+          <input
+            type="text"
+            value={filters.zipSearch}
+            onChange={(e) => updateFilter("zipSearch", e.target.value)}
+            className="input text-xs mt-2"
+            placeholder="Search zip code..."
+          />
         </div>
 
         {/* Fan Behavior */}
