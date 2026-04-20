@@ -7,21 +7,25 @@ export default async function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-nav text-white shadow-lg">
-      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="h-8 w-8 rounded-lg bg-white/10 backdrop-blur grid place-items-center text-white font-black text-sm border border-white/20">
-            F
-          </div>
-          <span className="font-display text-lg font-bold tracking-tight">FansFest</span>
-        </Link>
-
-        <div className="hidden md:flex items-center gap-1">
-          <Link href="/dashboard" className="px-3 py-1.5 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition">Dashboard</Link>
-          <Link href="/chat" className="px-3 py-1.5 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition">Chat</Link>
-          <Link href="/profile" className="px-3 py-1.5 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition">Profile</Link>
+      <nav className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6 relative">
+        {/* Left nav items */}
+        <div className="hidden md:flex items-center gap-1 flex-1">
+          <span className="px-2.5 py-1 text-xs font-bold tracking-wider text-red-400 uppercase">Live</span>
+          <Link href="/signup" className="px-3 py-1.5 text-xs font-semibold tracking-wider text-white/80 hover:text-white uppercase transition">Signup</Link>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Center logo */}
+        <Link href="/" className="flex items-center gap-2 group md:absolute md:left-1/2 md:-translate-x-1/2 z-10">
+          <span className="font-display text-xl font-bold tracking-tight uppercase">EJAE</span>
+        </Link>
+
+        {/* Right nav items */}
+        <div className="hidden md:flex items-center gap-1 flex-1 justify-end">
+          <Link href="https://open.spotify.com/search/EJAE" target="_blank" rel="noreferrer" className="px-3 py-1.5 text-xs font-semibold tracking-wider text-white/80 hover:text-white uppercase transition">Listen</Link>
+          <Link href="#" className="px-3 py-1.5 text-xs font-semibold tracking-wider text-white/80 hover:text-white uppercase transition">Store</Link>
+        </div>
+
+        <div className="flex items-center gap-2 md:ml-4">
           {user ? (
             <>
               <Link href="/dashboard" className="md:hidden px-2 py-1.5 text-white/70 hover:text-white transition">
@@ -33,8 +37,8 @@ export default async function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/login" className="hidden sm:inline-flex text-sm font-medium text-white/70 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 transition">Sign in</Link>
-              <Link href="/signup" className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-white text-brand-700 hover:bg-white/90 transition shadow-sm">Join</Link>
+              <Link href="/login" className="hidden sm:inline-flex text-sm font-medium text-white/80 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 transition">Sign in</Link>
+              <Link href="/signup" className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-white text-[#3D2852] hover:bg-white/90 transition shadow-sm">Join</Link>
             </>
           )}
         </div>

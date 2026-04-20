@@ -256,8 +256,9 @@ export default function InteractiveLanding() {
                     </div>
                   </div>
                   <div className="flex gap-1.5 shrink-0 self-end sm:self-auto">
-                    <button className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-50 text-brand">Weekly</button>
+                    <button className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#2D1B4E] text-white">Weekly</button>
                     <button className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted hover:bg-surface2">Monthly</button>
+                    <button className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted hover:bg-surface2">Full Leaderboard</button>
                   </div>
                 </div>
               </div>
@@ -427,7 +428,7 @@ export default function InteractiveLanding() {
                 {card.subtitle && <p className="text-xs text-muted mt-0.5">{card.subtitle}</p>}
                 <button
                   onClick={() => handleClaim(card.req)}
-                  className="w-full mt-3 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-600 transition"
+                  className="w-full mt-3 py-2.5 rounded-xl bg-surface2 text-text border border-border text-sm font-semibold hover:bg-lavender-200 transition"
                 >
                   {card.cta}
                 </button>
