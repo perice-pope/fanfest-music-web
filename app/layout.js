@@ -2,9 +2,9 @@ import "./globals.css";
 import ChatProvider from "@/components/ChatProvider";
 
 export const metadata = {
-  title: "FansFest — Where fans and artists connect",
+  title: "FanFest — Where fans and artists connect",
   description:
-    "FansFest is a membership community where fans and artists meet. Connect your Spotify, chat with the community, and never miss a drop.",
+    "FanFest is a membership community where fans and artists meet. Connect your Spotify, chat with the community, and never miss a drop.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
 };
 

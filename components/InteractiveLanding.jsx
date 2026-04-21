@@ -128,7 +128,7 @@ export default function InteractiveLanding() {
   // ── Invite Friends ──
   const handleInvite = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText("https://fansfest.com/invite/ejae?ref=you").catch(() => {});
+      navigator.clipboard.writeText("https://fanfest.com/invite/ejae?ref=you").catch(() => {});
     }
     fireToast("Invite link copied!");
   };

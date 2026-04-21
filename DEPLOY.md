@@ -1,11 +1,11 @@
-# Deploying FansFest to Vercel
+# Deploying FanFest to Vercel
 
 ## 1. Push to GitHub
 ```bash
 cd fansfest-web
 git init
 git add .
-git commit -m "FansFest MVP"
+git commit -m "FanFest MVP"
 git branch -M main
 git remote add origin git@github.com:<you>/fansfest-web.git
 git push -u origin main

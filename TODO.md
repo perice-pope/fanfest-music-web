@@ -1,4 +1,4 @@
-# FansFest TODO
+# FanFest TODO
 
 ## Shipped (MVP day 1)
 - [x] Landing page (hero, chat preview, social link buttons)

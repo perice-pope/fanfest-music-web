@@ -39,11 +39,11 @@ function LoginForm() {
         <div className="w-full max-w-md">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-10 group">
             <div className="h-10 w-10 rounded-xl bg-brand grid place-items-center text-white font-black text-lg">F</div>
-            <span className="font-display text-xl font-bold">FansFest</span>
+            <span className="font-display text-xl font-bold">FanFest</span>
           </Link>
 
           <h1 className="font-display text-3xl font-bold">Welcome back</h1>
-          <p className="text-muted mt-2">Sign in to your FansFest account.</p>
+          <p className="text-muted mt-2">Sign in to your FanFest account.</p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
             <label className="block">
@@ -79,7 +79,7 @@ function LoginForm() {
         />
         <div className="absolute inset-0 flex items-end p-8">
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-card-lg max-w-sm">
-            <p className="text-sm italic text-muted">&ldquo;FansFest changed how I connect with my fans. It&apos;s real.&rdquo;</p>
+            <p className="text-sm italic text-muted">&ldquo;FanFest changed how I connect with my fans. It&apos;s real.&rdquo;</p>
             <p className="text-sm font-semibold mt-2 text-brand">EJAE</p>
           </div>
         </div>

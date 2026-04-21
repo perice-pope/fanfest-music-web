@@ -1,4 +1,4 @@
--- FansFest schema
+-- FanFest schema
 -- Run in Supabase SQL editor (or `supabase db push`).
 
 -- =========================================

@@ -33,7 +33,7 @@ function DemoProfile() {
           <div className="space-y-4">
             <label className="block">
               <span className="text-sm text-muted font-medium">Email</span>
-              <input readOnly value="demo@fansfest.com" className="input mt-1.5 opacity-60 cursor-not-allowed" />
+              <input readOnly value="demo@fanfest.com" className="input mt-1.5 opacity-60 cursor-not-allowed" />
             </label>
             <label className="block">
               <span className="text-sm text-muted font-medium">Display name</span>
@@ -106,7 +106,7 @@ export default async function ProfilePage() {
       <Navbar />
       <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
         <h1 className="font-display text-3xl font-bold">Profile & Settings</h1>
-        <p className="text-muted text-sm mt-1">Manage how you appear in FansFest.</p>
+        <p className="text-muted text-sm mt-1">Manage how you appear in FanFest.</p>
 
         {user ? (
           <div className="mt-8 grid gap-4">

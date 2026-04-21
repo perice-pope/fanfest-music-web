@@ -1,4 +1,4 @@
--- FansFest Storage: Avatar Uploads
+-- FanFest Storage: Avatar Uploads
 -- Run in Supabase SQL editor AFTER schema.sql
 
 -- 1) Create the avatars bucket (public so URLs are servable without auth)

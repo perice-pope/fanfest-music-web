@@ -37,7 +37,7 @@ export default function SocialLinkButton({ platform, href, label }) {
         </span>
         <div>
           <div className="text-sm font-semibold capitalize">{label || platform}</div>
-          <div className="text-xs text-muted">@fansfest</div>
+          <div className="text-xs text-muted">@fanfest</div>
         </div>
       </div>
       <span className="text-muted group-hover:text-brand group-hover:translate-x-0.5 transition-all">&rarr;</span>

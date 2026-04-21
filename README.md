@@ -1,6 +1,6 @@
-# FansFest Web
+# FanFest Web
 
-Production-shaped MVP for FansFest: landing page, auth, Spotify connect, Supabase-backed realtime chat, and a profile/settings shell — all in a single Next.js (App Router) codebase.
+Production-shaped MVP for FanFest: landing page, auth, Spotify connect, Supabase-backed realtime chat, and a profile/settings shell — all in a single Next.js (App Router) codebase.
 
 ## Stack
 

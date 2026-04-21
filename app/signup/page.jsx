@@ -49,7 +49,7 @@ export default function SignupPage() {
         <div className="absolute inset-0 flex items-end p-8">
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-card-lg max-w-sm">
             <p className="text-sm italic text-muted">&ldquo;The community here is different. Real fans, real conversations.&rdquo;</p>
-            <p className="text-sm font-semibold mt-2 text-brand">Maya, FansFest Member</p>
+            <p className="text-sm font-semibold mt-2 text-brand">Maya, FanFest Member</p>
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-10 group">
             <div className="h-10 w-10 rounded-xl bg-brand grid place-items-center text-white font-black text-lg">F</div>
-            <span className="font-display text-xl font-bold">FansFest</span>
+            <span className="font-display text-xl font-bold">FanFest</span>
           </Link>
 
           <h1 className="font-display text-3xl font-bold">Join the fest</h1>
