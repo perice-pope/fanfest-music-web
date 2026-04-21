@@ -145,14 +145,14 @@ export default function InteractiveLanding() {
       <div className="bg-white border-b border-border/60">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex items-center justify-between h-12 sm:h-14 gap-2">
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar shrink min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar shrink min-w-0">
               {TABS.map((tab, i) => (
                 <button
                   key={tab}
                   onClick={() => handleTabClick(i)}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg whitespace-nowrap transition ${
+                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-full whitespace-nowrap transition ${
                     i === activeTab
-                      ? "bg-brand-50 text-brand"
+                      ? "bg-lavender-200 text-[#3D2852]"
                       : "text-muted hover:text-text hover:bg-surface2"
                   }`}
                 >
@@ -160,13 +160,13 @@ export default function InteractiveLanding() {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              <button onClick={openChat} className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-muted hover:text-brand rounded-lg hover:bg-surface2 transition">
-                <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <button onClick={openChat} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#3D2852] bg-lavender-200 rounded-full hover:bg-lavender-300 transition">
+                <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                 <span className="hidden sm:inline">Chat Rooms</span>
-                <span className="badge text-[10px]">4</span>
+                <span className="inline-flex items-center justify-center rounded-full bg-success text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1">4</span>
               </button>
-              <Link href="/dashboard" className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-surface2 text-muted rounded-lg hover:text-brand transition">
+              <Link href="/dashboard" className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-pink-light text-[#3D2852] rounded-full hover:bg-pink transition">
                 Admin Portal
               </Link>
             </div>
@@ -226,19 +226,31 @@ export default function InteractiveLanding() {
 
                 {/* Stats */}
                 <div className="mt-4 sm:mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-                  <div className="rounded-xl bg-surface2 border border-border/40 px-2 sm:px-4 py-2.5 sm:py-3 text-center">
-                    <div className="text-[10px] sm:text-xs text-muted font-medium">Total XP</div>
-                    <div className={`font-display font-bold text-base sm:text-lg mt-0.5 transition-all duration-500 ${animatingXp ? "text-brand scale-110" : ""}`}>
-                      {formattedXp}
+                  <div className="rounded-xl bg-surface2 border border-border/40 px-3 sm:px-4 py-2.5 sm:py-3">
+                    <div className="text-[10px] sm:text-xs text-muted font-medium uppercase tracking-wider">Total XP Earned</div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/20 text-[11px] sm:text-xs font-semibold text-warning">
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning" />
+                        <span className={`transition-all duration-500 ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
+                      </span>
+                      <span className="text-[10px] sm:text-xs text-muted">4/5 Quests</span>
                     </div>
                   </div>
-                  <div className="rounded-xl bg-surface2 border border-border/40 px-2 sm:px-4 py-2.5 sm:py-3 text-center">
-                    <div className="text-[10px] sm:text-xs text-muted font-medium">Membership</div>
-                    <div className="font-display font-bold text-base sm:text-lg mt-0.5">Free</div>
+                  <div className="rounded-xl bg-surface2 border border-border/40 px-3 sm:px-4 py-2.5 sm:py-3">
+                    <div className="text-[10px] sm:text-xs text-muted font-medium uppercase tracking-wider">Membership / Wallet</div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/20 text-[11px] sm:text-xs font-semibold text-warning">
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning" />VIP
+                      </span>
+                    </div>
                   </div>
-                  <div className="rounded-xl bg-surface2 border border-border/40 px-2 sm:px-4 py-2.5 sm:py-3 text-center">
-                    <div className="text-[10px] sm:text-xs text-muted font-medium">Status</div>
-                    <div className="font-display font-bold text-base sm:text-lg mt-0.5 text-brand">SUPERFAN</div>
+                  <div className="rounded-xl bg-surface2 border border-border/40 px-3 sm:px-4 py-2.5 sm:py-3">
+                    <div className="text-[10px] sm:text-xs text-muted font-medium uppercase tracking-wider">Superfan+</div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/20 text-[11px] sm:text-xs font-semibold text-success">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" />Active
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -254,7 +266,7 @@ export default function InteractiveLanding() {
 
           {/* ─── Activity Members Row ─── */}
           <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-6">
-            <div className="rounded-2xl bg-white border border-border/60 shadow-card p-5 overflow-hidden">
+            <div className="rounded-2xl bg-surface2 border border-border/60 shadow-card p-5 overflow-hidden">
               <div className="flex gap-6 overflow-x-auto no-scrollbar pb-2">
                 {[
                   { name: "Jacques", points: "1.8K", avatar: "jacques" },
