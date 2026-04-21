@@ -4,7 +4,10 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Toast from "@/components/Toast";
+import LinkAppModal from "@/components/LinkAppModal";
 import { useChat } from "@/components/ChatProvider";
+
+const STORAGE_KEY = "fansfest_linked_apps";
 
 const TABS = ["Activities", "Rewards", "Announcements"];
 
@@ -31,7 +34,30 @@ export default function InteractiveLanding() {
   const [showToast, setShowToast] = useState(false);
   const [rewardCarouselStart, setRewardCarouselStart] = useState(0);
 
+  // Link Apps modal state
+  const [linkModalApp, setLinkModalApp] = useState(null); // { key, name, icon, placeholder } | null
+  const [linkedApps, setLinkedApps] = useState({}); // { spotify: "@handle", tiktok: "@handle", ... }
+
   const rewardsSectionRef = useRef(null);
+
+  // Hydrate linked apps from localStorage
+  useEffect(() => {
+    try {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+      if (raw) setLinkedApps(JSON.parse(raw));
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  const saveLinkedApps = useCallback((next) => {
+    setLinkedApps(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      /* noop */
+    }
+  }, []);
 
   // ── Helpers ──
   const fireToast = useCallback((msg) => {
@@ -81,6 +107,22 @@ export default function InteractiveLanding() {
       const needed = numReq - xp;
       fireToast(`You need ${needed.toLocaleString()} more XP to claim!`);
     }
+  };
+
+  // ── Link Apps ──
+  const handleOpenLinkModal = (app) => setLinkModalApp(app);
+  const handleCloseLinkModal = () => setLinkModalApp(null);
+  const handleLinkApp = (key, handle) => {
+    const next = { ...linkedApps, [key]: handle };
+    saveLinkedApps(next);
+    setLinkModalApp(null);
+    fireToast(`${key.charAt(0).toUpperCase() + key.slice(1)} linked as @${handle}`);
+  };
+  const handleUnlinkApp = (key) => {
+    const next = { ...linkedApps };
+    delete next[key];
+    saveLinkedApps(next);
+    fireToast(`Unlinked ${key}`);
   };
 
   // ── Invite Friends ──
@@ -409,30 +451,32 @@ export default function InteractiveLanding() {
             { title: "Discounted Tickets", subtitle: "Next tour presale access", cta: "Claim Now", req: "2000XP", image: "/images/artist/ejae-portrait.jpeg" },
             { title: "Signed Set List", subtitle: "Personally autographed by EJAE", cta: "Claim Now", req: "4000XP", image: "/images/artist/ejae-time-after-time.jpg" },
           ].map((card, i) => (
-            <div key={i} className="card overflow-hidden">
-              <div className="relative">
-                <div className="h-48 relative">
+            <div key={i} className="rounded-2xl overflow-hidden bg-gradient-reward shadow-card text-white">
+              <div className="relative p-3">
+                <div className="h-44 relative rounded-xl overflow-hidden">
                   <Image src={card.image} alt="" fill className="object-cover" />
                 </div>
-                <div className="absolute top-3 left-3">
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-brand-50 text-brand flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand" />Open
+                <div className="absolute top-5 left-5">
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/90 text-[#3D2852] flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" />Open
                   </span>
                 </div>
               </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-sm">{card.title}</h3>
-                {card.subtitle && <p className="text-xs text-muted mt-0.5">{card.subtitle}</p>}
+              <div className="px-4 pt-2 pb-4 text-center">
+                <h3 className="font-display font-bold text-sm uppercase tracking-wider">{card.title}</h3>
+                {card.subtitle && <p className="text-[11px] text-white/70 mt-0.5">{card.subtitle}</p>}
                 <button
                   onClick={() => handleClaim(card.req)}
-                  className="w-full mt-3 py-2.5 rounded-xl bg-surface2 text-text border border-border text-sm font-semibold hover:bg-lavender-200 transition"
+                  className="w-full mt-3 py-2.5 rounded-xl bg-white text-[#3D2852] text-sm font-semibold hover:bg-white/90 transition"
                 >
                   {card.cta}
                 </button>
               </div>
-              <div className="px-4 py-3 border-t border-border/40">
-                <div className="text-[10px] text-muted">Requirements</div>
-                <span className="chip text-[10px] py-0.5 mt-0.5">{card.req}</span>
+              <div className="px-4 py-3 border-t border-white/10 bg-black/10">
+                <div className="text-[10px] text-white/70">Requirements</div>
+                <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full bg-warning/20 text-warning text-[10px] font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-warning" />{card.req}
+                </span>
               </div>
             </div>
           ))}
@@ -446,22 +490,85 @@ export default function InteractiveLanding() {
         </h2>
         <p className="text-xs sm:text-sm text-muted mb-4 sm:mb-5">Link your apps and use these hashtags so we can reward your fandom <span className="text-brand font-medium">#EJAE</span> <span className="text-brand font-medium">#TimeAfterTime</span></p>
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
-          <Link href="https://open.spotify.com/search/EJAE" target="_blank" rel="noreferrer" className="card-hover flex flex-col items-center justify-center py-6 sm:py-10 group">
-            <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="#1DB954"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.8.8 0 01-1.1.3c-3-1.8-6.8-2.2-11.3-1.2a.8.8 0 11-.3-1.5c4.9-1.1 9.1-.6 12.4 1.3.4.2.5.7.3 1.1zm1.2-2.7a1 1 0 01-1.3.3c-3.5-2.1-8.7-2.7-12.8-1.5a1 1 0 01-.6-1.9c4.6-1.4 10.4-.7 14.4 1.7.5.3.6.9.3 1.4zm.1-2.8C14 8.6 7.6 8.4 3.8 9.5a1.2 1.2 0 11-.7-2.3C7.6 5.9 14.7 6.1 19.1 8.7a1.2 1.2 0 01-1.2 2.2z"/></svg>
-            <div className="font-display font-semibold text-xs sm:text-base">Spotify</div>
-          </Link>
-          <Link href="https://www.tiktok.com/@ejaemusic" target="_blank" rel="noreferrer" className="card-hover flex flex-col items-center justify-center py-6 sm:py-10 group">
-            <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="#1A1525"><path d="M20 8.3a6.7 6.7 0 01-4-1.3v7.7a5.7 5.7 0 11-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 102 2.8V2h2.8A4.2 4.2 0 0020 6.1v2.2z"/></svg>
-            <div className="font-display font-semibold text-xs sm:text-base">TikTok</div>
-          </Link>
-          <Link href="https://www.instagram.com/ejaemusic" target="_blank" rel="noreferrer" className="card-hover flex flex-col items-center justify-center py-6 sm:py-10 group">
-            <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="none" stroke="#E1306C" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="#E1306C"/></svg>
-            <div className="font-display font-semibold text-xs sm:text-base">Instagram</div>
-          </Link>
+          {[
+            {
+              key: "spotify",
+              name: "Spotify",
+              placeholder: "yourusername",
+              pinkIcon: (
+                <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="#D88BA0"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.8.8 0 01-1.1.3c-3-1.8-6.8-2.2-11.3-1.2a.8.8 0 11-.3-1.5c4.9-1.1 9.1-.6 12.4 1.3.4.2.5.7.3 1.1zm1.2-2.7a1 1 0 01-1.3.3c-3.5-2.1-8.7-2.7-12.8-1.5a1 1 0 01-.6-1.9c4.6-1.4 10.4-.7 14.4 1.7.5.3.6.9.3 1.4zm.1-2.8C14 8.6 7.6 8.4 3.8 9.5a1.2 1.2 0 11-.7-2.3C7.6 5.9 14.7 6.1 19.1 8.7a1.2 1.2 0 01-1.2 2.2z"/></svg>
+              ),
+              smallIcon: (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="#D88BA0"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.8.8 0 01-1.1.3c-3-1.8-6.8-2.2-11.3-1.2a.8.8 0 11-.3-1.5c4.9-1.1 9.1-.6 12.4 1.3.4.2.5.7.3 1.1zm1.2-2.7a1 1 0 01-1.3.3c-3.5-2.1-8.7-2.7-12.8-1.5a1 1 0 01-.6-1.9c4.6-1.4 10.4-.7 14.4 1.7.5.3.6.9.3 1.4zm.1-2.8C14 8.6 7.6 8.4 3.8 9.5a1.2 1.2 0 11-.7-2.3C7.6 5.9 14.7 6.1 19.1 8.7a1.2 1.2 0 01-1.2 2.2z"/></svg>
+              ),
+            },
+            {
+              key: "tiktok",
+              name: "TikTok",
+              placeholder: "yourhandle",
+              pinkIcon: (
+                <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="#D88BA0"><path d="M20 8.3a6.7 6.7 0 01-4-1.3v7.7a5.7 5.7 0 11-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 102 2.8V2h2.8A4.2 4.2 0 0020 6.1v2.2z"/></svg>
+              ),
+              smallIcon: (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="#D88BA0"><path d="M20 8.3a6.7 6.7 0 01-4-1.3v7.7a5.7 5.7 0 11-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 102 2.8V2h2.8A4.2 4.2 0 0020 6.1v2.2z"/></svg>
+              ),
+            },
+            {
+              key: "instagram",
+              name: "Instagram",
+              placeholder: "yourhandle",
+              pinkIcon: (
+                <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="none" stroke="#D88BA0" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="#D88BA0"/></svg>
+              ),
+              smallIcon: (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#D88BA0" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="#D88BA0"/></svg>
+              ),
+            },
+          ].map((app) => {
+            const linkedHandle = linkedApps[app.key];
+            return (
+              <button
+                key={app.key}
+                type="button"
+                onClick={() => handleOpenLinkModal({ ...app, icon: app.smallIcon })}
+                className={`card-hover flex flex-col items-center justify-center py-6 sm:py-10 group relative ${linkedHandle ? "ring-2 ring-success/50" : ""}`}
+              >
+                {linkedHandle && (
+                  <span className="absolute top-2 right-2 h-5 w-5 rounded-full bg-success text-white text-[10px] grid place-items-center" title="Linked">
+                    ✓
+                  </span>
+                )}
+                {app.pinkIcon}
+                <div className="font-display font-semibold text-xs sm:text-base">{app.name}</div>
+                {linkedHandle ? (
+                  <>
+                    <div className="text-[10px] sm:text-xs text-success font-medium mt-0.5">@{linkedHandle}</div>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => { e.stopPropagation(); handleUnlinkApp(app.key); }}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); handleUnlinkApp(app.key); } }}
+                      className="text-[10px] text-muted mt-1 hover:text-brand transition"
+                    >
+                      Unlink
+                    </span>
+                  </>
+                ) : (
+                  <div className="text-[10px] sm:text-xs text-muted mt-0.5">Tap to link</div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      {/* ─── Toast ─── */}
+      {/* ─── Modals & Toast ─── */}
+      <LinkAppModal
+        open={!!linkModalApp}
+        app={linkModalApp}
+        onClose={handleCloseLinkModal}
+        onLink={handleLinkApp}
+      />
       <Toast message={toastMsg} show={showToast} onClose={closeToast} />
     </>
   );

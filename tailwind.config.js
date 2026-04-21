@@ -55,7 +55,8 @@ module.exports = {
         "gradient-brand": "linear-gradient(135deg, #E8DEFF 0%, #D4C0F7 50%, #B794F6 100%)",
         "gradient-hero": "linear-gradient(135deg, #F3EEFF 0%, #E8DEFF 30%, #FAF8FF 100%)",
         "gradient-nav": "linear-gradient(to right, #8B6FA8 0%, #5B3D7A 50%, #3D2852 100%)",
-        "gradient-footer": "linear-gradient(135deg, #2D1B4E 0%, #1A1525 100%)",
+        "gradient-footer": "linear-gradient(to right, #2D1B4E 0%, #4A2F5A 60%, #8B5A7A 100%)",
+        "gradient-reward": "linear-gradient(180deg, #5B3D7A 0%, #6B4A8A 50%, #8B5A7A 100%)",
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-out",
