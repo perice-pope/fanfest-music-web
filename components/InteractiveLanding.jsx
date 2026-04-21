@@ -124,13 +124,6 @@ export default function InteractiveLanding() {
                 <span className="hidden sm:inline">Chat Rooms</span>
                 <span className="badge text-[10px]">4</span>
               </button>
-              <div className="hidden sm:flex -space-x-2">
-                {["u1","u2","u3"].map((u,i) => (
-                  <div key={i} className="h-8 w-8 rounded-full overflow-hidden ring-2 ring-white">
-                    <img src={`https://i.pravatar.cc/64?u=${u}`} alt="" className="h-full w-full object-cover" />
-                  </div>
-                ))}
-              </div>
               <Link href="/dashboard" className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-surface2 text-muted rounded-lg hover:text-brand transition">
                 Admin Portal
               </Link>
@@ -413,8 +406,8 @@ export default function InteractiveLanding() {
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {[
             { title: "Limited Edition Merch", subtitle: "Tuesday, May 10 | 03:43", cta: "Claim Now", req: "1000XP", image: "/images/artist/ejae-press.webp" },
-            { title: "Discounted Tickets", subtitle: null, cta: "Claim Now", req: "2000XP", image: "/images/artist/ejae-portrait.jpeg" },
-            { title: "Discounted Tickets", subtitle: null, cta: "Claim Now", req: "4000XP", image: "/images/artist/ejae-time-after-time.jpg" },
+            { title: "Discounted Tickets", subtitle: "Next tour presale access", cta: "Claim Now", req: "2000XP", image: "/images/artist/ejae-portrait.jpeg" },
+            { title: "Signed Set List", subtitle: "Personally autographed by EJAE", cta: "Claim Now", req: "4000XP", image: "/images/artist/ejae-time-after-time.jpg" },
           ].map((card, i) => (
             <div key={i} className="card overflow-hidden">
               <div className="relative">
