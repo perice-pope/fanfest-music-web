@@ -5,3 +5,6 @@ node_modules
 .DS_Store
 npm-debug.log*
 .vercel
+
+# Figma design reference assets — keep local, not in repo
+FanFest - (Figma images)/
