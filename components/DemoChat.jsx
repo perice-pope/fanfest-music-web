@@ -141,8 +141,8 @@ export default function DemoChat() {
           const name = isMe ? "You" : m.userName;
           return (
             <div key={m.id} className={`flex items-end gap-2.5 ${isMe ? "flex-row-reverse" : ""}`}>
-              <div className={`h-8 w-8 shrink-0 rounded-full grid place-items-center text-white text-xs font-bold ${isMe ? "bg-brand" : user?.color || "bg-lavender-400"}`}>
-                {name[0]?.toUpperCase() || "?"}
+              <div className={`h-8 w-8 shrink-0 rounded-full overflow-hidden ${isMe ? "ring-2 ring-brand" : ""}`}>
+                <img src={`https://i.pravatar.cc/64?u=${isMe ? "guest" : name.toLowerCase()}`} alt={name} className="h-full w-full object-cover" />
               </div>
               <div className={`max-w-[75%] ${isMe ? "text-right" : ""}`}>
                 <div className="flex items-baseline gap-2 mb-0.5">

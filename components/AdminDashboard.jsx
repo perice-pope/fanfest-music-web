@@ -601,8 +601,8 @@ function UserTable({ users }) {
               visibleUsers.map((u) => (
                 <tr key={u.id} className="border-b border-border/30 hover:bg-surface2/30 transition-colors">
                   <td className="px-5 py-3">
-                    <div className={`h-9 w-9 rounded-full ${u.genderColor} grid place-items-center text-white text-xs font-bold`}>
-                      {u.genderCode}
+                    <div className={`h-9 w-9 rounded-full overflow-hidden ring-2 ${u.genderColor.replace("bg-", "ring-")}/40`}>
+                      <img src={`https://i.pravatar.cc/72?u=${u.id}`} alt={u.fullName} className="h-full w-full object-cover" />
                     </div>
                   </td>
                   <td className="px-3 py-3 font-medium whitespace-nowrap">{u.fullName}</td>

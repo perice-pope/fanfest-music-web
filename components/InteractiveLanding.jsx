@@ -125,7 +125,11 @@ export default function InteractiveLanding() {
                 <span className="badge text-[10px]">4</span>
               </button>
               <div className="hidden sm:flex -space-x-2">
-                {["bg-brand","bg-lavender-400","bg-pink"].map((c,i) => <div key={i} className={`h-8 w-8 rounded-full ${c} ring-2 ring-white`} />)}
+                {["u1","u2","u3"].map((u,i) => (
+                  <div key={i} className="h-8 w-8 rounded-full overflow-hidden ring-2 ring-white">
+                    <img src={`https://i.pravatar.cc/64?u=${u}`} alt="" className="h-full w-full object-cover" />
+                  </div>
+                ))}
               </div>
               <Link href="/dashboard" className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-surface2 text-muted rounded-lg hover:text-brand transition">
                 Admin Portal
@@ -218,17 +222,17 @@ export default function InteractiveLanding() {
             <div className="rounded-2xl bg-white border border-border/60 shadow-card p-5 overflow-hidden">
               <div className="flex gap-6 overflow-x-auto no-scrollbar pb-2">
                 {[
-                  { name: "Jacques", points: "1.8K", color: "bg-brand" },
-                  { name: "Lauren", points: "1.5K", color: "bg-lavender-400" },
-                  { name: "Kristine", points: "1.2K", color: "bg-pink" },
-                  { name: "Tracey", points: "980", color: "bg-accent" },
-                  { name: "Marco", points: "870", color: "bg-lavender-500" },
-                  { name: "Alex", points: "750", color: "bg-brand-400" },
+                  { name: "Jacques", points: "1.8K", avatar: "jacques" },
+                  { name: "Lauren", points: "1.5K", avatar: "lauren" },
+                  { name: "Kristine", points: "1.2K", avatar: "kristine" },
+                  { name: "Tracey", points: "980", avatar: "tracey" },
+                  { name: "Marco", points: "870", avatar: "marco" },
+                  { name: "Alex", points: "750", avatar: "alex" },
                 ].map((m, i) => (
                   <div key={i} className="flex flex-col items-center gap-1.5 shrink-0">
                     <div className="relative">
-                      <div className={`h-14 w-14 rounded-full ${m.color} grid place-items-center text-white font-bold text-lg`}>
-                        {m.name[0]}
+                      <div className="h-14 w-14 rounded-full overflow-hidden ring-2 ring-warning/70">
+                        <img src={`https://i.pravatar.cc/112?u=${m.avatar}`} alt={m.name} className="h-full w-full object-cover" />
                       </div>
                       {i === 0 && <div className="absolute -top-1 -right-1 badge text-[8px] px-1 min-w-[16px] h-4 bg-warning text-black">1st</div>}
                     </div>
@@ -265,18 +269,18 @@ export default function InteractiveLanding() {
               {/* Rows */}
               <div className="divide-y divide-border/40">
                 {[
-                  { rank: 1, name: "Roman Wesley", points: "1900" },
-                  { rank: 2, name: "Julia Hanner", points: "1700" },
-                  { rank: 3, name: "Jenny Wilson", points: "1500" },
-                  { rank: "12", name: "You", points: formattedXp, isYou: true },
+                  { rank: 1, name: "Roman Wesley", points: "1900", avatar: "roman" },
+                  { rank: 2, name: "Julia Hanner", points: "1700", avatar: "julia" },
+                  { rank: 3, name: "Jenny Wilson", points: "1500", avatar: "jenny" },
+                  { rank: "12", name: "You", points: formattedXp, isYou: true, avatar: "you" },
                 ].map((r, i) => (
                   <div key={i} className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 ${r.isYou ? "bg-brand-50/50" : "hover:bg-surface2/50"} transition-colors`}>
                     <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full grid place-items-center text-xs sm:text-sm font-bold shrink-0 ${r.rank <= 3 ? "bg-brand text-white" : "bg-surface2 text-muted"}`}>
                       {r.rank}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0">
-                      <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full grid place-items-center text-white text-[10px] sm:text-xs font-bold shrink-0 ${r.isYou ? "bg-brand" : "bg-lavender-400"}`}>
-                        {r.name[0]}
+                      <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full overflow-hidden shrink-0 ${r.isYou ? "ring-2 ring-brand" : ""}`}>
+                        <img src={`https://i.pravatar.cc/64?u=${r.avatar}`} alt={r.name} className="h-full w-full object-cover" />
                       </div>
                       <span className={`text-xs sm:text-sm font-medium truncate ${r.isYou ? "text-brand font-semibold" : ""}`}>{r.name}</span>
                     </div>

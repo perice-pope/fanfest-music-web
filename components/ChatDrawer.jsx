@@ -268,12 +268,12 @@ export default function ChatDrawer() {
           <div className="px-5 py-3 flex items-center gap-3 border-b border-border/30">
             {/* Avatar stack */}
             <div className="flex -space-x-2">
-              {["bg-brand", "bg-lavender-400", "bg-pink", "bg-amber-500"].map((c, i) => (
+              {["jacques", "lauren", "kristine", "marco"].map((u, i) => (
                 <div
                   key={i}
-                  className={`h-8 w-8 rounded-full ${c} ring-2 ring-white grid place-items-center text-white text-[10px] font-bold`}
+                  className="h-8 w-8 rounded-full overflow-hidden ring-2 ring-white"
                 >
-                  {["J", "L", "K", "M"][i]}
+                  <img src={`https://i.pravatar.cc/64?u=${u}`} alt="" className="h-full w-full object-cover" />
                 </div>
               ))}
             </div>
@@ -386,11 +386,9 @@ export default function ChatDrawer() {
               return (
                 <div key={m.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
                   <div
-                    className={`h-7 w-7 shrink-0 rounded-full grid place-items-center text-white text-[10px] font-bold ${
-                      isMe ? "bg-brand" : user?.color || "bg-lavender-400"
-                    }`}
+                    className={`h-7 w-7 shrink-0 rounded-full overflow-hidden ${isMe ? "ring-2 ring-brand" : ""}`}
                   >
-                    {name[0]?.toUpperCase() || "?"}
+                    <img src={`https://i.pravatar.cc/56?u=${isMe ? "guest" : name.toLowerCase()}`} alt={name} className="h-full w-full object-cover" />
                   </div>
                   <div className={`max-w-[78%] ${isMe ? "text-right" : ""}`}>
                     <div className="flex items-baseline gap-1.5 mb-0.5">
