@@ -340,7 +340,7 @@ function FiltersSidebar({
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:block w-[280px] shrink-0 bg-surface border border-border/60 rounded-2xl shadow-card p-5 h-fit max-h-[calc(100vh-120px)] sticky top-20 flex flex-col">
+      <aside className="hidden md:flex flex-col w-[280px] shrink-0 bg-surface border border-border/60 rounded-2xl shadow-card p-5 h-[calc(100vh-120px)] sticky top-20 overflow-hidden">
         {content}
       </aside>
 
