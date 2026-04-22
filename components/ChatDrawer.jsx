@@ -5,10 +5,10 @@ import { useChat } from "@/components/ChatProvider";
 
 /* ─── Room data ─── */
 const ROOMS = [
-  { id: 1, name: "EJAE Official Fan Club", members: 89, online: 12, color: "bg-brand" },
-  { id: 2, name: "Stan Club", members: 45, online: 8, color: "bg-lavender-400" },
-  { id: 3, name: "New Music Discussion", members: 34, online: 5, color: "bg-brand-400" },
-  { id: 4, name: "Concert Meetups", members: 28, online: 3, color: "bg-lavender-500" },
+  { id: 1, name: "EJAE Official Fan Club", members: 89, online: 12, color: "bg-brand", host: "Amanda", newMessages: 12 },
+  { id: 2, name: "Stan Club", members: 45, online: 8, color: "bg-lavender-400", host: "Jenny", newMessages: 7 },
+  { id: 3, name: "New Music Discussion", members: 34, online: 5, color: "bg-brand-400", host: "Marco", newMessages: 4 },
+  { id: 4, name: "Concert Meetups", members: 28, online: 3, color: "bg-lavender-500", host: "Lauren", newMessages: 9 },
 ];
 
 const TOTAL_ONLINE = ROOMS.reduce((sum, r) => sum + r.online, 0);
@@ -387,6 +387,44 @@ export default function ChatDrawer() {
               />
             </div>
           </div>
+
+          {/* Room summary card */}
+          {currentRoom && (
+            <div className="px-4 pt-3 shrink-0">
+              <div className="rounded-2xl bg-surface2 p-4 space-y-2.5">
+                <div className="font-display font-bold text-[15px] tracking-tight uppercase text-text">
+                  {currentRoom.name}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center h-6 min-w-[28px] px-1.5 rounded-md bg-[#2D1B4E] text-white text-[11px] font-bold">
+                    {currentRoom.newMessages}
+                  </span>
+                  <span className="text-xs text-text">New Messages</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <img
+                    src={`https://i.pravatar.cc/48?u=${currentRoom.host.toLowerCase()}`}
+                    alt={currentRoom.host}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                  <span className="text-xs text-text">Hosted by {currentRoom.host}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {["jacques", "lauren", "kristine"].map((u) => (
+                      <img
+                        key={u}
+                        src={`https://i.pravatar.cc/48?u=${u}`}
+                        alt=""
+                        className="h-6 w-6 rounded-full object-cover ring-2 ring-surface2"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-text">{currentRoom.members} Members</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Messages */}
           <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 bg-bg/50">
