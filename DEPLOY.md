@@ -2,12 +2,12 @@
 
 ## 1. Push to GitHub
 ```bash
-cd fansfest-web
+cd fanfest-music-web
 git init
 git add .
 git commit -m "FanFest MVP"
 git branch -M main
-git remote add origin git@github.com:<you>/fansfest-web.git
+git remote add origin git@github.com:<you>/fanfest-music-web.git
 git push -u origin main
 ```
 
