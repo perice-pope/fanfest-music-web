@@ -377,6 +377,17 @@ export default function ChatDrawer() {
             </span>
           </div>
 
+          {/* Room banner photo */}
+          <div className="px-4 pt-3 shrink-0">
+            <div className="relative h-32 w-full rounded-2xl overflow-hidden">
+              <img
+                src="/images/artist/ejae-press.webp"
+                alt={currentRoom?.name || "Room"}
+                className="h-full w-full object-cover object-top"
+              />
+            </div>
+          </div>
+
           {/* Messages */}
           <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 bg-bg/50">
             {currentMessages.map((m) => {
