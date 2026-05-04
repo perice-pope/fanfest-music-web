@@ -4,12 +4,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: "#FAF8FF",
+        bg: "#fefefe",
         surface: "#FFFFFF",
         surface2: "#F3EEFF",
         border: "#E2D9F3",
         muted: "#7C7493",
-        text: "#1A1525",
+        text: "#000000",
         // Figma design tokens
         mauve: {
           DEFAULT: "#6f597d",
