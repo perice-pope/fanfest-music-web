@@ -23,9 +23,10 @@ const CORRECT_ANSWER = "1. D6";
 
 // Activity members – matches Figma data exactly (names, flags, points, descriptions, times)
 // Flag codes are ISO 3166-1 alpha-2 (lowercase) for flagcdn.com
+// `boosted` flags members who get the special star pill next to their name (per Figma)
 const ACTIVITY_MEMBERS = [
   { name: "Jacques", points: 200, flag: "es", desc: "sharing a playlist", time: "15 min", avatar: "jacques" },
-  { name: "Max", points: 500, flag: "es", desc: "outfit", time: "30 min", avatar: "max" },
+  { name: "Max", points: 500, flag: "es", desc: "outfit", time: "30 min", avatar: "max", boosted: true },
   { name: "Laurent", points: 800, flag: "ua", desc: "performing a cover", time: "30 min", avatar: "laurent" },
   { name: "Antoine", points: 100, flag: "es", desc: "joining newsletter", time: "15 min", avatar: "antoine" },
   { name: "Thierry", points: 150, flag: "ye", desc: "buying tickets", time: "15 min", avatar: "thierry" },
@@ -68,19 +69,19 @@ const YOU_RANK = { Weekly: 12, Monthly: 47, "Full Leaderboard": 132 };
 
 const flagUrl = (code) => `https://flagcdn.com/w80/${code}.png`;
 
-// Activity cards
+// Activity cards (image swap: listening party ↔ record a cover)
 const ACTIVITY_CARDS = [
   { kind: "trivia", status: "Open", title: "What's the highest note EJAE can sing?", reward: "100XP" },
-  { kind: "event", status: "Open", title: "EJAE listening party + fan Q&A", reward: "500XP", image: "/images/artist/ejae-press.webp", cta: "Check In Now" },
+  { kind: "event", status: "Open", title: "EJAE listening party + fan Q&A", reward: "500XP", image: "/images/artist/ejae-portrait.jpeg", cta: "Check In Now" },
   { kind: "event", status: "Completed", title: "EJAE Trivia: Play to Earn Points and unlock achievements", reward: "500XP", image: "/images/artist/ejae-time-after-time.jpg", cta: "Play Now" },
-  { kind: "event", status: "Open", title: "Record a cover", reward: "750XP", image: "/images/artist/ejae-portrait.jpeg", cta: "Submit Cover" },
+  { kind: "event", status: "Open", title: "Record a cover", reward: "750XP", image: "/images/artist/ejae-press.webp", cta: "Submit Cover" },
 ];
 
-// Rewards data
+// Rewards data — Signed Set List uses the Limited Edition Merch image
 const REWARDS = [
   { title: "Limited Edition Merch", subtitle: "Spring Collection", req: "1000XP", image: "/images/artist/ejae-press.webp" },
   { title: "Discounted Tickets", subtitle: "Next tour presale access", req: "2000XP", image: "/images/artist/ejae-portrait.jpeg" },
-  { title: "Signed Set List", subtitle: "Personally autographed by EJAE", req: "4000XP", image: "/images/artist/ejae-time-after-time.jpg" },
+  { title: "Signed Set List", subtitle: "Personally autographed by EJAE", req: "4000XP", image: "/images/artist/ejae-press.webp" },
   { title: "Backstage Meet & Greet", subtitle: "VIP access on tour stops", req: "6000XP", image: "/images/artist/instagram-live.webp" },
 ];
 
@@ -369,13 +370,9 @@ export default function InteractiveLanding() {
                     <div className="flex flex-col gap-3">
                       <div className="font-display font-semibold text-[15px] text-white uppercase tracking-wide">Membership / Wallet</div>
                       <div>
-                        {/* VIP white pill with crown icon */}
-                        <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
-                          <span className="h-4 w-4 rounded grid place-items-center bg-mauve text-white text-[10px]">
-                            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
-                              <path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z" />
-                            </svg>
-                          </span>
+                        {/* VIP white pill with mauve star icon (matches Figma star indicator) */}
+                        <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1.5 pr-2.5 py-1">
+                          <img src="/images/icons/star.svg" alt="" className="h-3.5 w-3.5" />
                           <span className="font-display font-semibold text-[13px] text-black">VIP</span>
                         </div>
                       </div>
@@ -455,7 +452,15 @@ export default function InteractiveLanding() {
                         </div>
                       </div>
                       <div className="w-full flex flex-col items-center text-center">
-                        <div className="font-display font-medium text-sm text-black px-1 py-0.5">{m.name}</div>
+                        {/* Boosted members get a mauve pill with a star icon next to their name (per Figma — e.g. Max) */}
+                        {m.boosted ? (
+                          <div className="inline-flex items-center gap-1 bg-mauve rounded-full pl-2 pr-1.5 py-0.5">
+                            <span className="font-display font-medium text-sm text-white">{m.name}</span>
+                            <img src="/images/icons/star.svg" alt="" className="h-3 w-3 brightness-0 invert" />
+                          </div>
+                        ) : (
+                          <div className="font-display font-medium text-sm text-black px-1 py-0.5">{m.name}</div>
+                        )}
                         <div className="font-display font-semibold text-[13px] text-black leading-snug px-1">
                           Earn points for {m.desc}
                         </div>
@@ -572,6 +577,8 @@ export default function InteractiveLanding() {
                     <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
                       <img src={flagUrl("fr")} alt="FR" className="h-full w-full object-cover" />
                     </div>
+                    {/* Mauve star indicator next to You (per Figma) */}
+                    <img src="/images/icons/star.svg" alt="" className="h-4 w-4 shrink-0" />
                   </div>
                   <span className="font-display font-bold text-base text-black shrink-0">{formattedXp}</span>
                 </div>
@@ -837,11 +844,11 @@ export default function InteractiveLanding() {
               name: "Instagram",
               placeholder: "yourhandle",
               icon: (
-                <svg viewBox="0 0 24 24" className="h-20 w-20 sm:h-24 sm:w-24 transition-transform group-hover:scale-110" fill="none" stroke="#cfa29f" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="5"/>
-                  <circle cx="12" cy="12" r="4.5"/>
-                  <circle cx="17.5" cy="6.5" r="1.2" fill="#cfa29f"/>
-                </svg>
+                <img
+                  src="/images/icons/instagram.svg"
+                  alt="Instagram"
+                  className="h-20 w-20 sm:h-24 sm:w-24 transition-transform group-hover:scale-110"
+                />
               ),
             },
           ].map((app) => {
