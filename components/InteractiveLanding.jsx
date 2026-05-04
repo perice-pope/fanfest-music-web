@@ -24,17 +24,26 @@ const CORRECT_ANSWER = "1. D6";
 // Activity members – matches Figma data exactly (names, flags, points, descriptions, times)
 // Flag codes are ISO 3166-1 alpha-2 (lowercase) for flagcdn.com
 // `boosted` flags members who get the special star pill next to their name (per Figma)
+// Avatar keys map to /public/images/users/{key}.png pulled from Figma
 const ACTIVITY_MEMBERS = [
   { name: "Jacques", points: 200, flag: "es", desc: "sharing a playlist", time: "15 min", avatar: "jacques" },
   { name: "Max", points: 500, flag: "es", desc: "outfit", time: "30 min", avatar: "max", boosted: true },
   { name: "Laurent", points: 800, flag: "ua", desc: "performing a cover", time: "30 min", avatar: "laurent" },
   { name: "Antoine", points: 100, flag: "es", desc: "joining newsletter", time: "15 min", avatar: "antoine" },
   { name: "Thierry", points: 150, flag: "ye", desc: "buying tickets", time: "15 min", avatar: "thierry" },
-  { name: "Pierre", points: 900, flag: "ua", desc: "creating fan club", time: "45 min", avatar: "pierre" },
+  { name: "Pierre", points: 900, flag: "ua", desc: "creating fan club", time: "45 min", avatar: "pierre-fan" },
   { name: "Michel", points: 300, flag: "ua", desc: "top contributor in chat", time: "30 min", avatar: "michel" },
-  { name: "Oliver", points: 200, flag: "ua", desc: "sending a message", time: "12 min", avatar: "oliver" },
-  { name: "Farhad", points: 200, flag: "es", desc: "playing the game", time: "12 min", avatar: "farhad" },
+  { name: "Oliver", points: 200, flag: "ua", desc: "sending a message", time: "12 min", avatar: "pierre-fan" },
+  { name: "Farhad", points: 200, flag: "es", desc: "playing the game", time: "12 min", avatar: "jacques" },
 ];
+
+// Avatars we have locally (pulled from Figma). Anything not in this set falls back to pravatar.cc
+const LOCAL_AVATARS = new Set([
+  "jacques", "max", "laurent", "antoine", "thierry", "michel", "pierre-fan",
+  "roman", "julia", "jenny", "you",
+]);
+const avatarUrl = (key, size = 140) =>
+  LOCAL_AVATARS.has(key) ? `/images/users/${key}.png` : `https://i.pravatar.cc/${size}?u=${key}`;
 
 // Leaderboard data – three views with different rankings/scores
 const LEADERBOARDS = {
@@ -457,7 +466,7 @@ export default function InteractiveLanding() {
                     <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 w-[135px]">
                       <div className="relative w-[135px] h-[70px] flex items-center justify-center">
                         <div className="h-[70px] w-[70px] rounded-full overflow-hidden ring-[3px] ring-white">
-                          <img src={`https://i.pravatar.cc/140?u=${m.avatar}`} alt={m.name} className="h-full w-full object-cover" />
+                          <img src={avatarUrl(m.avatar, 140)} alt={m.name} className="h-full w-full object-cover" />
                         </div>
                         {/* Gold XP badge */}
                         <div
@@ -570,7 +579,7 @@ export default function InteractiveLanding() {
                       </div>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="h-9 w-9 rounded-full overflow-hidden shrink-0">
-                          <img src={`https://i.pravatar.cc/72?u=${r.avatar}`} alt={r.name} className="h-full w-full object-cover" />
+                          <img src={avatarUrl(r.avatar, 72)} alt={r.name} className="h-full w-full object-cover" />
                         </div>
                         <span
                           className={`font-medium text-sm truncate ${isFirst ? "" : "text-black"}`}
@@ -604,7 +613,7 @@ export default function InteractiveLanding() {
                   </div>
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-mauve">
-                      <img src="https://i.pravatar.cc/72?u=you" alt="You" className="h-full w-full object-cover" />
+                      <img src={avatarUrl("you", 72)} alt="You" className="h-full w-full object-cover" />
                     </div>
                     <span className="font-display font-bold text-sm text-mauve">You</span>
                     <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
