@@ -286,15 +286,15 @@ export default function InteractiveLanding() {
           */}
           <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-5">
             <div className="relative rounded-[32px] overflow-hidden bg-figmaGray">
-              {/* Top section with banner image background */}
+              {/* Top section with banner image background — uses the Figma exported eyes banner */}
               <div className="relative">
                 <Image
-                  src="/images/artist/ejae-time-after-time.jpg"
+                  src="/images/artist/ejae-eyes-banner.png"
                   alt="EJAE"
                   width={1408}
                   height={274}
                   className="w-full h-[274px] object-cover"
-                  style={{ objectPosition: "center 30%" }}
+                  style={{ objectPosition: "center center" }}
                   priority
                 />
                 {/* Subtle dark overlay for legibility */}
