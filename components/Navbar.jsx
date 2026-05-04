@@ -6,7 +6,7 @@ export default async function Navbar() {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-nav text-white shadow-lg">
+    <header className="hidden md:block sticky top-0 z-50 bg-gradient-nav text-white shadow-lg">
       <nav className="mx-auto flex h-[58px] max-w-6xl items-center px-4 sm:px-6 relative">
         {/* Left nav items */}
         <div className="hidden md:flex items-center gap-1 flex-1">

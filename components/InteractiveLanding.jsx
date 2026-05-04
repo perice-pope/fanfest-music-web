@@ -337,7 +337,7 @@ export default function InteractiveLanding() {
                     </Link>
                     <Link
                       href="/signup"
-                      className="bg-white text-mauve hover:bg-mauve hover:text-white transition rounded-full px-6 py-3 font-display font-bold uppercase text-sm tracking-wide shadow-card"
+                      className="hidden md:inline-flex bg-white text-mauve hover:bg-mauve hover:text-white transition rounded-full px-6 py-3 font-display font-bold uppercase text-sm tracking-wide shadow-card"
                     >
                       Join Fan Club
                     </Link>
