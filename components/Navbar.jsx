@@ -7,10 +7,10 @@ export default async function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-nav text-white shadow-lg">
-      <nav className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6 relative">
+      <nav className="mx-auto flex h-[58px] max-w-6xl items-center px-4 sm:px-6 relative">
         {/* Left nav items */}
         <div className="hidden md:flex items-center gap-1 flex-1">
-          <span className="px-2.5 py-1 text-xs font-bold tracking-wider text-red-400 uppercase">Live</span>
+          <span className="px-2.5 py-1 text-xs font-bold tracking-wider text-white uppercase">Live</span>
           <Link href="/signup" className="px-3 py-1.5 text-xs font-semibold tracking-wider text-white/80 hover:text-white uppercase transition">Signup</Link>
         </div>
 

@@ -21,48 +21,122 @@ const HOW_IT_WORKS_SLIDES = [
 const TRIVIA_OPTIONS = ["1. D6", "2. C6", "3. A5", "4. Bb4"];
 const CORRECT_ANSWER = "1. D6";
 
+// Activity members – matches Figma data exactly (names, flags, points, descriptions, times)
+// Flag codes are ISO 3166-1 alpha-2 (lowercase) for flagcdn.com
+const ACTIVITY_MEMBERS = [
+  { name: "Jacques", points: 200, flag: "es", desc: "sharing a playlist", time: "15 min", avatar: "jacques" },
+  { name: "Max", points: 500, flag: "es", desc: "outfit", time: "30 min", avatar: "max" },
+  { name: "Laurent", points: 800, flag: "ua", desc: "performing a cover", time: "30 min", avatar: "laurent" },
+  { name: "Antoine", points: 100, flag: "es", desc: "joining newsletter", time: "15 min", avatar: "antoine" },
+  { name: "Thierry", points: 150, flag: "ye", desc: "buying tickets", time: "15 min", avatar: "thierry" },
+  { name: "Pierre", points: 900, flag: "ua", desc: "creating fan club", time: "45 min", avatar: "pierre" },
+  { name: "Michel", points: 300, flag: "ua", desc: "top contributor in chat", time: "30 min", avatar: "michel" },
+  { name: "Oliver", points: 200, flag: "ua", desc: "sending a message", time: "12 min", avatar: "oliver" },
+  { name: "Farhad", points: 200, flag: "es", desc: "playing the game", time: "12 min", avatar: "farhad" },
+];
+
+// Leaderboard data – three views with different rankings/scores
+const LEADERBOARDS = {
+  Weekly: [
+    { rank: 1, name: "Roman Wesley", points: "1900", flag: "fr", avatar: "roman" },
+    { rank: 2, name: "Julia Hanner", points: "1700", flag: "br", avatar: "julia" },
+    { rank: 3, name: "Jenny Wilson", points: "1500", flag: "ga", avatar: "jenny" },
+  ],
+  Monthly: [
+    { rank: 1, name: "Sofia Martinez", points: "8420", flag: "es", avatar: "sofia" },
+    { rank: 2, name: "Roman Wesley", points: "7980", flag: "fr", avatar: "roman" },
+    { rank: 3, name: "Marcus Chen", points: "7650", flag: "ua", avatar: "marcus" },
+    { rank: 4, name: "Julia Hanner", points: "6900", flag: "br", avatar: "julia" },
+    { rank: 5, name: "Aaliyah Khan", points: "6240", flag: "ye", avatar: "aaliyah" },
+  ],
+  "Full Leaderboard": [
+    { rank: 1, name: "Sofia Martinez", points: "42,810", flag: "es", avatar: "sofia" },
+    { rank: 2, name: "Roman Wesley", points: "39,205", flag: "fr", avatar: "roman" },
+    { rank: 3, name: "Marcus Chen", points: "37,640", flag: "ua", avatar: "marcus" },
+    { rank: 4, name: "Julia Hanner", points: "32,180", flag: "br", avatar: "julia" },
+    { rank: 5, name: "Aaliyah Khan", points: "29,475", flag: "ye", avatar: "aaliyah" },
+    { rank: 6, name: "Diego Costa", points: "26,890", flag: "br", avatar: "diego" },
+    { rank: 7, name: "Anya Volkov", points: "24,310", flag: "ua", avatar: "anya" },
+    { rank: 8, name: "Lucas Moreno", points: "21,750", flag: "es", avatar: "lucas" },
+    { rank: 9, name: "Jenny Wilson", points: "19,420", flag: "ga", avatar: "jenny" },
+    { rank: 10, name: "Karim Hassan", points: "17,890", flag: "ye", avatar: "karim" },
+  ],
+};
+
+// "You" rank changes with the tab too
+const YOU_RANK = { Weekly: 12, Monthly: 47, "Full Leaderboard": 132 };
+
+const flagUrl = (code) => `https://flagcdn.com/w80/${code}.png`;
+
+// Activity cards
+const ACTIVITY_CARDS = [
+  { kind: "trivia", status: "Open", title: "What's the highest note EJAE can sing?", reward: "100XP" },
+  { kind: "event", status: "Open", title: "EJAE listening party + fan Q&A", reward: "500XP", image: "/images/artist/ejae-press.webp", cta: "Check In Now" },
+  { kind: "event", status: "Completed", title: "EJAE Trivia: Play to Earn Points and unlock achievements", reward: "500XP", image: "/images/artist/ejae-time-after-time.jpg", cta: "Play Now" },
+  { kind: "event", status: "Open", title: "Record a cover", reward: "750XP", image: "/images/artist/ejae-portrait.jpeg", cta: "Submit Cover" },
+];
+
+// Rewards data
+const REWARDS = [
+  { title: "Limited Edition Merch", subtitle: "Spring Collection", req: "1000XP", image: "/images/artist/ejae-press.webp" },
+  { title: "Discounted Tickets", subtitle: "Next tour presale access", req: "2000XP", image: "/images/artist/ejae-portrait.jpeg" },
+  { title: "Signed Set List", subtitle: "Personally autographed by EJAE", req: "4000XP", image: "/images/artist/ejae-time-after-time.jpg" },
+  { title: "Backstage Meet & Greet", subtitle: "VIP access on tour stops", req: "6000XP", image: "/images/artist/instagram-live.webp" },
+];
+
+// Star icon used in section headings
+const SectionStar = () => (
+  <span className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-white shadow-card text-mauve text-2xl shrink-0">
+    ★
+  </span>
+);
+
+// Gold coin token used in stats pills (matches Figma "Coin" instance)
+const GoldCoin = ({ size = 16 }) => (
+  <span
+    className="inline-block rounded-full ring-[0.5px] ring-black/40 shrink-0"
+    style={{
+      width: size,
+      height: size,
+      background: "linear-gradient(135deg, #ffca17 0%, #977400 100%)",
+    }}
+    aria-hidden="true"
+  />
+);
+
 export default function InteractiveLanding() {
   const { openChat } = useChat();
 
-  // ── State ──
   const [activeTab, setActiveTab] = useState(0);
   const [howItWorksSlide, setHowItWorksSlide] = useState(0);
-  const [triviaAnswer, setTriviaAnswer] = useState(null); // null | string
+  const [triviaAnswer, setTriviaAnswer] = useState(null);
   const [xp, setXp] = useState(1500);
   const [animatingXp, setAnimatingXp] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [showToast, setShowToast] = useState(false);
-  const [rewardCarouselStart, setRewardCarouselStart] = useState(0);
+  const [leaderboardTab, setLeaderboardTab] = useState("Weekly");
 
-  // Link Apps modal state
-  const [linkModalApp, setLinkModalApp] = useState(null); // { key, name, icon, placeholder } | null
-  const [linkedApps, setLinkedApps] = useState({}); // { spotify: "@handle", tiktok: "@handle", ... }
+  const [linkModalApp, setLinkModalApp] = useState(null);
+  const [linkedApps, setLinkedApps] = useState({});
 
   const rewardsSectionRef = useRef(null);
 
-  // Hydrate linked apps from localStorage
   useEffect(() => {
     try {
       const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
       if (raw) setLinkedApps(JSON.parse(raw));
-    } catch {
-      /* noop */
-    }
+    } catch {}
   }, []);
 
   const saveLinkedApps = useCallback((next) => {
     setLinkedApps(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      /* noop */
-    }
+    } catch {}
   }, []);
 
-  // ── Helpers ──
   const fireToast = useCallback((msg) => {
     setShowToast(false);
-    // Small delay so React can unmount the previous toast before re-mounting
     setTimeout(() => {
       setToastMsg(msg);
       setShowToast(true);
@@ -71,7 +145,6 @@ export default function InteractiveLanding() {
 
   const closeToast = useCallback(() => setShowToast(false), []);
 
-  // ── Tab handler ──
   const handleTabClick = (index) => {
     setActiveTab(index);
     if (index === 1 && rewardsSectionRef.current) {
@@ -79,14 +152,12 @@ export default function InteractiveLanding() {
     }
   };
 
-  // ── How It Works pagination ──
   const handleDotClick = () => {
     setHowItWorksSlide((prev) => (prev + 1) % HOW_IT_WORKS_SLIDES.length);
   };
 
-  // ── Trivia answer ──
   const handleTriviaAnswer = (option) => {
-    if (triviaAnswer) return; // already answered
+    if (triviaAnswer) return;
     setTriviaAnswer(option);
     if (option === CORRECT_ANSWER) {
       setAnimatingXp(true);
@@ -98,7 +169,6 @@ export default function InteractiveLanding() {
     }
   };
 
-  // ── Rewards claim ──
   const handleClaim = (requiredXp) => {
     const numReq = parseInt(requiredXp.replace(/[^0-9]/g, ""), 10);
     if (xp >= numReq) {
@@ -109,7 +179,6 @@ export default function InteractiveLanding() {
     }
   };
 
-  // ── Link Apps ──
   const handleOpenLinkModal = (app) => setLinkModalApp(app);
   const handleCloseLinkModal = () => setLinkModalApp(null);
   const handleLinkApp = (key, handle) => {
@@ -125,7 +194,6 @@ export default function InteractiveLanding() {
     fireToast(`Unlinked ${key}`);
   };
 
-  // ── Invite Friends ──
   const handleInvite = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText("https://fanfest.com/invite/ejae?ref=you").catch(() => {});
@@ -133,40 +201,50 @@ export default function InteractiveLanding() {
     fireToast("Invite link copied!");
   };
 
-  // ── Format XP ──
   const formattedXp = xp.toLocaleString();
-
-  // ── Current "How it works" slide ──
   const currentSlide = HOW_IT_WORKS_SLIDES[howItWorksSlide];
 
   return (
     <>
-      {/* ─── Sub-nav Tabs ─── */}
-      <div className="bg-white border-b border-border/60">
+      {/* ─── Sub-nav: Mauve ovals matching Figma exactly ─── */}
+      <div className="bg-bg pt-5 pb-2">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="flex items-center justify-between h-12 sm:h-14 gap-2">
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar shrink min-w-0">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            {/* Left: Activities / Rewards / Announcements in one mauve oval */}
+            <div className="inline-flex items-center bg-mauve rounded-full p-1 shrink-0">
               {TABS.map((tab, i) => (
                 <button
                   key={tab}
                   onClick={() => handleTabClick(i)}
-                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-full whitespace-nowrap transition ${
+                  className={`font-display font-semibold uppercase text-[13px] sm:text-sm tracking-wide text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all duration-200 ${
                     i === activeTab
-                      ? "bg-lavender-200 text-[#3D2852]"
-                      : "text-muted hover:text-text hover:bg-surface2"
+                      ? "bg-mauve-700 shadow-md -translate-y-0.5"
+                      : "hover:-translate-y-0.5 hover:bg-mauve-600"
                   }`}
                 >
                   {tab}
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <button onClick={openChat} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#3D2852] bg-lavender-200 rounded-full hover:bg-lavender-300 transition">
-                <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
-                <span className="hidden sm:inline">Chat Rooms</span>
-                <span className="inline-flex items-center justify-center rounded-full bg-success text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1">4</span>
+
+            {/* Right group: Chat Rooms (mauve) + Admin Portal (peach) */}
+            <div className="flex items-center gap-3 ml-auto">
+              <button
+                onClick={openChat}
+                className="inline-flex items-center gap-2.5 bg-mauve text-white rounded-full pl-3 pr-2 py-2 hover:bg-mauve-600 transition"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.62 1.31 4.96 3.39 6.55-.05.93-.34 2.36-1.39 3.65 0 0 2.51-.36 4.55-1.71.74.18 1.52.31 2.32.36.38.03.76.05 1.13.05 5.52 0 10-3.94 10-8.8S17.52 2 12 2z" />
+                </svg>
+                <span className="font-display font-semibold uppercase text-[13px] sm:text-sm tracking-wide">Chat Rooms</span>
+                <span className="inline-flex items-center justify-center h-7 min-w-[28px] px-1.5 rounded-md bg-white text-mauve font-display font-bold text-base">
+                  4
+                </span>
               </button>
-              <Link href="/dashboard" className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-pink-light text-[#3D2852] rounded-full hover:bg-pink transition">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center bg-peach text-white rounded-full px-5 py-2.5 hover:bg-peach-light hover:text-mauve transition font-display font-bold uppercase text-[13px] sm:text-sm tracking-wide"
+              >
                 Admin Portal
               </Link>
             </div>
@@ -174,22 +252,22 @@ export default function InteractiveLanding() {
         </div>
       </div>
 
-      {/* ─── How It Works Banner ─── */}
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-6">
+      {/* ─── How It Works (Gray box) ─── */}
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-4">
         <div
-          className="rounded-2xl bg-white border border-border/60 shadow-card px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-3 cursor-pointer select-none"
+          className="rounded-[32px] bg-figmaGray px-6 sm:px-8 py-5 flex items-center justify-between gap-4 cursor-pointer select-none"
           onClick={handleDotClick}
         >
           <div className="min-w-0">
-            <h2 className="font-display text-sm sm:text-base font-semibold">{currentSlide.title}</h2>
-            <p className="text-xs sm:text-sm text-muted">{currentSlide.desc}</p>
+            <h2 className="font-display text-base sm:text-lg font-bold text-black">{currentSlide.title}</h2>
+            <p className="font-display text-sm sm:text-base font-medium text-black/70 mt-0.5">{currentSlide.desc}</p>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {HOW_IT_WORKS_SLIDES.map((_, i) => (
               <div
                 key={i}
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  i === howItWorksSlide ? "w-8 sm:w-10 bg-brand" : "w-2 bg-border"
+                  i === howItWorksSlide ? "w-10 bg-mauve" : "w-2 bg-white"
                 }`}
               />
             ))}
@@ -200,230 +278,417 @@ export default function InteractiveLanding() {
       {/* ─── Activities Tab Content ─── */}
       {activeTab === 0 && (
         <>
-          {/* ─── Hero Banner + Profile ─── */}
-          <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-6">
-            <div className="rounded-2xl bg-white border border-border/60 shadow-card overflow-hidden">
-              {/* Banner */}
-              <div className="h-40 sm:h-56 relative">
-                <Image src="/images/artist/ejae-press.webp" alt="EJAE" fill className="object-cover object-top" priority />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
-              </div>
-              {/* Profile row */}
-              <div className="px-4 sm:px-6 pb-5 sm:pb-6 -mt-10 sm:-mt-12 relative z-10">
-                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4">
-                  <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full border-4 border-white overflow-hidden shadow-card-lg bg-white shrink-0">
-                    <Image src="/images/artist/ejae-time-after-time.jpg" alt="EJAE" width={96} height={96} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="text-center sm:text-left flex-1 pt-1 sm:pt-2">
-                    <h1 className="font-display text-xl sm:text-2xl font-bold">EJAE</h1>
-                    <p className="text-muted text-xs sm:text-sm">R&B / Pop &middot; &ldquo;Time After Time&rdquo;</p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <Link href="/signup" className="btn-primary px-5 justify-center">Join Fan Club</Link>
-                    <Link href="/api/spotify/connect" className="btn-secondary px-4 justify-center">Connect Spotify</Link>
-                  </div>
-                </div>
+          {/* ─── Hero Card (matches Figma node 107:2140 exactly) ───
+               ONE merged card containing:
+                 1. Top section (banner image bg) with profile pill, stats columns
+                 2. White divider line
+                 3. Bottom section (gray) with activity members
+          */}
+          <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-5">
+            <div className="relative rounded-[32px] overflow-hidden bg-figmaGray">
+              {/* Top section with banner image background */}
+              <div className="relative">
+                <Image
+                  src="/images/artist/ejae-time-after-time.jpg"
+                  alt="EJAE"
+                  width={1408}
+                  height={274}
+                  className="w-full h-[274px] object-cover"
+                  style={{ objectPosition: "center 30%" }}
+                  priority
+                />
+                {/* Subtle dark overlay for legibility */}
+                <div className="absolute inset-0 bg-black/20" />
 
-                {/* Stats */}
-                <div className="mt-4 sm:mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-                  <div className="rounded-xl bg-surface2 border border-border/40 px-3 sm:px-4 py-2.5 sm:py-3">
-                    <div className="text-[10px] sm:text-xs text-muted font-medium uppercase tracking-wider">Total XP Earned</div>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/20 text-[11px] sm:text-xs font-semibold text-warning">
-                        <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-                        <span className={`transition-all duration-500 ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
-                      </span>
-                      <span className="text-[10px] sm:text-xs text-muted">4/5 Quests</span>
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-surface2 border border-border/40 px-3 sm:px-4 py-2.5 sm:py-3">
-                    <div className="text-[10px] sm:text-xs text-muted font-medium uppercase tracking-wider">Membership / Wallet</div>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/20 text-[11px] sm:text-xs font-semibold text-warning">
-                        <span className="h-1.5 w-1.5 rounded-full bg-warning" />VIP
-                      </span>
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-surface2 border border-border/40 px-3 sm:px-4 py-2.5 sm:py-3">
-                    <div className="text-[10px] sm:text-xs text-muted font-medium uppercase tracking-wider">Superfan+</div>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/20 text-[11px] sm:text-xs font-semibold text-success">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success" />Active
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
-                  <button onClick={handleInvite} className="btn-secondary text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2">Invite Friends &middot; +300XP</button>
-                  <button className="btn-secondary text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2">Upgrade / Top-up</button>
-                  <button className="btn-secondary text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2">See Benefits</button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* ─── Activity Members Row ─── */}
-          <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-6">
-            <div className="rounded-2xl bg-surface2 border border-border/60 shadow-card p-5 overflow-hidden">
-              <div className="flex gap-6 overflow-x-auto no-scrollbar pb-2">
-                {[
-                  { name: "Jacques", points: "1.8K", avatar: "jacques" },
-                  { name: "Lauren", points: "1.5K", avatar: "lauren" },
-                  { name: "Kristine", points: "1.2K", avatar: "kristine" },
-                  { name: "Tracey", points: "980", avatar: "tracey" },
-                  { name: "Marco", points: "870", avatar: "marco" },
-                  { name: "Alex", points: "750", avatar: "alex" },
-                ].map((m, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 shrink-0">
-                    <div className="relative">
-                      <div className="h-14 w-14 rounded-full overflow-hidden ring-2 ring-warning/70">
-                        <img src={`https://i.pravatar.cc/112?u=${m.avatar}`} alt={m.name} className="h-full w-full object-cover" />
+                {/* Overlay content: profile pill row + 3-column stats grid */}
+                <div className="absolute inset-0 p-8 flex flex-col gap-8">
+                  {/* Top row: Profile pill (left) + Join Fan Club CTA (right) */}
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Per Figma node 107:2144 — NO pill background. Just a solid mauve avatar circle + floating white text */}
+                    <Link
+                      href="/profile"
+                      className="inline-flex items-center gap-3 group"
+                    >
+                      <div className="h-[50px] w-[50px] rounded-full bg-mauve grid place-items-center shrink-0">
+                        <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-figmaGray">
+                          <img src="/images/users/pierre.png" alt="Pierre" className="h-full w-full object-cover" />
+                        </div>
                       </div>
-                      {i === 0 && <div className="absolute -top-1 -right-1 badge text-[8px] px-1 min-w-[16px] h-4 bg-warning text-black">1st</div>}
-                    </div>
-                    <div className="text-xs font-medium text-center truncate w-16">{m.name}</div>
-                    <div className="text-[10px] text-muted">Earn points for</div>
-                    <div className="text-[10px] text-muted">music & vibes</div>
+                      <div className="flex flex-col justify-center">
+                        <span className="font-display font-medium text-sm text-white leading-tight uppercase tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">Pierre</span>
+                        <span className="font-display font-medium text-[13px] text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">View Profile</span>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="bg-white text-mauve hover:bg-mauve hover:text-white transition rounded-full px-6 py-3 font-display font-bold uppercase text-sm tracking-wide shadow-card"
+                    >
+                      Join Fan Club
+                    </Link>
                   </div>
-                ))}
+
+                  {/* 3-column stats grid: each column has title + status row + action button */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-4 mt-auto">
+                    {/* COLUMN 1: TOTAL XP EARNED */}
+                    <div className="flex flex-col gap-3">
+                      <div className="font-display font-semibold text-[15px] text-white uppercase tracking-wide">Total XP earned</div>
+                      <div className="flex items-center gap-3">
+                        {/* 150XP white pill with gold coin */}
+                        <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
+                          <GoldCoin size={16} />
+                          <span className={`font-display font-semibold text-[13px] text-black transition-all ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
+                        </div>
+                        {/* 4/5 Quests Completed — progress-bar style (Figma 107:2161):
+                            WHITE outer (244x32) → DARK PURPLE fill ~80% from left → LIGHT PURPLE label
+                            inside the filled portion → empty WHITE tail on the right (the unfilled 20%). */}
+                        <div className="flex items-center bg-white rounded-full p-[2px] h-8 w-[244px] max-w-full">
+                          {/* Dark purple progress fill — extends visibly past the light purple inner pill;
+                              the light purple is sized to fit just the text so dark purple shows on the right,
+                              and a WHITE tail follows for the unfilled portion. */}
+                          <div className="flex items-center justify-start bg-mauve rounded-full pl-[2px] pr-3 py-[2px] h-full" style={{ width: "calc(100% * 0.85)" }}>
+                            <span className="inline-flex items-center justify-center bg-mauve-200 rounded-full h-full px-3 font-display font-semibold text-[13px] text-black whitespace-nowrap">
+                              4/5 Quests Completed
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Big white pill button: Invite friends + 200XP coin badge */}
+                      <button
+                        onClick={handleInvite}
+                        className="bg-white hover:bg-white/90 transition rounded-full pl-5 pr-1 py-1 flex items-center justify-between h-[50px]"
+                      >
+                        <span className="font-display font-medium text-[15px] text-black">Invite friends</span>
+                        <span className="inline-flex items-center gap-1.5 bg-figmaGray rounded-full pl-1 pr-2.5 py-1">
+                          <GoldCoin size={16} />
+                          <span className="font-display font-semibold text-[13px] text-black">200XP</span>
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* COLUMN 2: MEMBERSHIP / WALLET */}
+                    <div className="flex flex-col gap-3">
+                      <div className="font-display font-semibold text-[15px] text-white uppercase tracking-wide">Membership / Wallet</div>
+                      <div>
+                        {/* VIP white pill with crown icon */}
+                        <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
+                          <span className="h-4 w-4 rounded grid place-items-center bg-mauve text-white text-[10px]">
+                            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
+                              <path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z" />
+                            </svg>
+                          </span>
+                          <span className="font-display font-semibold text-[13px] text-black">VIP</span>
+                        </div>
+                      </div>
+                      {/* Big white pill button: Upgrade / Top up */}
+                      <button className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black">
+                        Upgrade / Top up
+                      </button>
+                    </div>
+
+                    {/* COLUMN 3: SUPERFAN+ */}
+                    <div className="flex flex-col gap-3">
+                      <div className="font-display font-semibold text-[15px] text-white uppercase tracking-wide">Superfan+</div>
+                      <div>
+                        {/* ACTIVE white pill with the official gold-coin icon (Figma asset) */}
+                        <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1">
+                          <img src="/images/icons/active-coin.png" alt="" className="h-4 w-4" />
+                          <span className="font-display font-semibold text-[13px] text-black">ACTIVE</span>
+                        </div>
+                      </div>
+                      {/* Big white pill button: See Benefits */}
+                      <button className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black">
+                        See Benefits
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* White divider line — full width edge-to-edge (Figma node 107:2198: line stroke white 4px, no horizontal padding) */}
+              <div className="bg-figmaGray pt-6 pb-5">
+                <div className="h-[4px] w-full bg-white" />
+              </div>
+
+              {/* Activity members row (gray section, integrated in same card) */}
+              <div
+                className="bg-figmaGray pb-8 px-8 relative"
+                style={{
+                  // Right-edge fade so off-screen items soften out of view
+                  WebkitMaskImage:
+                    "linear-gradient(to right, black 0%, black calc(100% - 80px), transparent 100%)",
+                  maskImage:
+                    "linear-gradient(to right, black 0%, black calc(100% - 80px), transparent 100%)",
+                }}
+              >
+                {/* pt-3 inside the scroll container gives the coin badges (top: -4px) clearance,
+                    since `overflow-x: auto` forces the browser to clip overflow-y too. */}
+                <div className="flex gap-4 overflow-x-auto no-scrollbar lg:justify-between pt-3">
+                  {ACTIVITY_MEMBERS.map((m, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 w-[135px]">
+                      <div className="relative w-[135px] h-[70px] flex items-center justify-center">
+                        <div className="h-[70px] w-[70px] rounded-full overflow-hidden ring-[3px] ring-white">
+                          <img src={`https://i.pravatar.cc/140?u=${m.avatar}`} alt={m.name} className="h-full w-full object-cover" />
+                        </div>
+                        {/* Gold XP badge */}
+                        <div
+                          className="absolute h-8 w-8 rounded-full grid place-items-center ring-[3px] ring-white"
+                          style={{
+                            background: "linear-gradient(135deg, #ffca17 0%, #977400 100%)",
+                            top: "-4px",
+                            left: "16px",
+                          }}
+                        >
+                          <div className="absolute inset-[1.5px] rounded-full border border-black/30 pointer-events-none" />
+                          <span className="font-display font-bold text-white text-[11px] leading-none relative">{m.points}</span>
+                        </div>
+                        {/* Flag */}
+                        <div
+                          className="absolute h-8 w-8 rounded-full overflow-hidden ring-[3px] ring-white bg-white"
+                          style={{ bottom: "-4px", right: "16px" }}
+                        >
+                          <img
+                            src={flagUrl(m.flag)}
+                            alt={m.flag.toUpperCase()}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full flex flex-col items-center text-center">
+                        <div className="font-display font-medium text-sm text-black px-1 py-0.5">{m.name}</div>
+                        <div className="font-display font-semibold text-[13px] text-black leading-snug px-1">
+                          Earn points for {m.desc}
+                        </div>
+                        <div className="font-display font-medium text-xs text-black/60 mt-1">{m.time}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
 
           {/* ─── Fans Leaderboard ─── */}
-          <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-6">
-            <div className="rounded-2xl bg-white border border-border/60 shadow-card overflow-hidden">
-              {/* Header */}
-              <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-border/40">
-                <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
+          <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-5">
+            <div className="rounded-[32px] bg-white border-2 border-mauve overflow-hidden">
+              {/* Header (gray translucent overlay) */}
+              <div className="bg-black/[0.06] px-5 sm:px-7 py-5 sm:py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-brand-50 grid place-items-center text-brand font-bold text-xs sm:text-sm shrink-0">E</div>
+                    {/* Stacked E + fans-icon + 1.2K badge (Figma uses Fans.svg, not eye icon) */}
+                    <div className="flex flex-col items-center justify-center bg-mauve rounded-full w-9 py-2.5 shrink-0">
+                      <span className="text-white font-bold text-[13px] leading-none">E</span>
+                      <img src="/images/icons/fans.svg" alt="" className="h-4 w-4 mt-1" />
+                      <span className="text-white font-display font-medium text-[10px] leading-none mt-1">1.2K</span>
+                    </div>
                     <div className="min-w-0">
-                      <h3 className="font-display font-bold text-sm sm:text-base">FANS LEADERBOARD</h3>
-                      <p className="text-[11px] sm:text-xs text-muted">Winner Gets 2 Concert Tickets And Pre-Show Artist Meet And Greet</p>
-                      <p className="text-[10px] text-muted mt-0.5">4 Days left</p>
+                      <h3 className="font-display font-bold text-lg sm:text-xl text-black uppercase tracking-tight">FANS LEADERBOARD</h3>
+                      <p className="font-display font-medium text-sm text-black/70">Winner Gets 2 Concert Tickets And Pre-Show Artist Meet And Greet</p>
+                      <p className="font-display font-medium text-xs text-black/50 mt-0.5">4 Days Left</p>
                     </div>
                   </div>
-                  <div className="flex gap-1.5 shrink-0 self-end sm:self-auto">
-                    <button className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#2D1B4E] text-white">Weekly</button>
-                    <button className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted hover:bg-surface2">Monthly</button>
-                    <button className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted hover:bg-surface2">Full Leaderboard</button>
+                  <div className="inline-flex items-center bg-white rounded-full p-1 shrink-0 self-start sm:self-auto">
+                    {["Weekly", "Monthly", "Full Leaderboard"].map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setLeaderboardTab(t)}
+                        className={`px-3.5 sm:px-4 py-1.5 rounded-full font-display font-semibold text-xs transition ${
+                          leaderboardTab === t ? "bg-mauve text-white" : "text-black/70 hover:text-black"
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
-              {/* Rows */}
-              <div className="divide-y divide-border/40">
-                {[
-                  { rank: 1, name: "Roman Wesley", points: "1900", avatar: "roman" },
-                  { rank: 2, name: "Julia Hanner", points: "1700", avatar: "julia" },
-                  { rank: 3, name: "Jenny Wilson", points: "1500", avatar: "jenny" },
-                  { rank: "12", name: "You", points: formattedXp, isYou: true, avatar: "you" },
-                ].map((r, i) => (
-                  <div key={i} className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 ${r.isYou ? "bg-brand-50/50" : "hover:bg-surface2/50"} transition-colors`}>
-                    <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full grid place-items-center text-xs sm:text-sm font-bold shrink-0 ${r.rank <= 3 ? "bg-brand text-white" : "bg-surface2 text-muted"}`}>
-                      {r.rank}
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0">
-                      <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full overflow-hidden shrink-0 ${r.isYou ? "ring-2 ring-brand" : ""}`}>
-                        <img src={`https://i.pravatar.cc/64?u=${r.avatar}`} alt={r.name} className="h-full w-full object-cover" />
+
+              {/* Rows: alternating white (rounded) / gray. Source data switches with the active tab. */}
+              <div>
+                {LEADERBOARDS[leaderboardTab].map((r, i) => {
+                  const isFirst = r.rank === 1;
+                  const isOdd = i % 2 === 0;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-center gap-4 px-5 sm:px-7 py-4 ${
+                        isOdd ? "bg-white" : "bg-figmaGray"
+                      }`}
+                    >
+                      {/* Rank circle */}
+                      <div
+                        className={`h-9 w-9 rounded-full grid place-items-center font-display font-bold text-base shrink-0 ${
+                          isFirst
+                            ? "text-white border-2 border-[#ab8f54]"
+                            : "bg-white border-2 border-mauve text-mauve"
+                        }`}
+                        style={
+                          isFirst
+                            ? { background: "linear-gradient(135deg, #ffca17 0%, #977400 100%)" }
+                            : undefined
+                        }
+                      >
+                        {r.rank}
                       </div>
-                      <span className={`text-xs sm:text-sm font-medium truncate ${r.isYou ? "text-brand font-semibold" : ""}`}>{r.name}</span>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="h-9 w-9 rounded-full overflow-hidden shrink-0">
+                          <img src={`https://i.pravatar.cc/72?u=${r.avatar}`} alt={r.name} className="h-full w-full object-cover" />
+                        </div>
+                        <span
+                          className={`font-medium text-sm truncate ${isFirst ? "" : "text-black"}`}
+                          style={
+                            isFirst
+                              ? {
+                                  background: "linear-gradient(135deg, #ffca17 0%, #977400 100%)",
+                                  WebkitBackgroundClip: "text",
+                                  WebkitTextFillColor: "transparent",
+                                  backgroundClip: "text",
+                                  fontWeight: 700,
+                                }
+                              : undefined
+                          }
+                        >
+                          {r.name}
+                        </span>
+                        <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
+                          <img src={flagUrl(r.flag)} alt={r.flag.toUpperCase()} className="h-full w-full object-cover" loading="lazy" />
+                        </div>
+                      </div>
+                      <span className="font-display font-bold text-base text-black shrink-0">{r.points}</span>
                     </div>
-                    <span className="text-xs sm:text-sm font-semibold text-muted shrink-0">{r.points}</span>
+                  );
+                })}
+
+                {/* You row (always last, mauve background) — rank changes per active tab */}
+                <div className="flex items-center gap-4 px-5 sm:px-7 py-4 bg-figmaGray">
+                  <div className="h-9 w-9 rounded-full bg-mauve grid place-items-center text-white font-display font-bold text-base shrink-0">
+                    {YOU_RANK[leaderboardTab]}
                   </div>
-                ))}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-mauve">
+                      <img src="https://i.pravatar.cc/72?u=you" alt="You" className="h-full w-full object-cover" />
+                    </div>
+                    <span className="font-display font-bold text-sm text-mauve">You</span>
+                    <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
+                      <img src={flagUrl("fr")} alt="FR" className="h-full w-full object-cover" />
+                    </div>
+                  </div>
+                  <span className="font-display font-bold text-base text-black shrink-0">{formattedXp}</span>
+                </div>
               </div>
-              <div className="px-4 sm:px-5 py-3 border-t border-border/40">
-                <button className="text-xs sm:text-sm text-brand font-medium hover:text-brand-600 transition">Full Leaderboard &rarr;</button>
+
+              <div className="px-5 sm:px-7 py-4 border-t border-mauve/30">
+                <button className="font-display font-semibold text-sm text-mauve hover:text-mauve-700 transition">
+                  Full Leaderboard &rarr;
+                </button>
               </div>
             </div>
           </section>
 
           {/* ─── Interact to Unlock Rewards ─── */}
-          <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="font-display text-base sm:text-xl font-bold flex items-center gap-2">
-                <span className="text-brand">+</span> Interact to Unlock Rewards
-              </h2>
-              <div className="flex gap-1">
-                <button className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-border grid place-items-center text-muted hover:text-brand hover:border-brand transition text-sm">&larr;</button>
-                <button className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-border grid place-items-center text-muted hover:text-brand hover:border-brand transition text-sm">&rarr;</button>
+          <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-8">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <SectionStar />
+                <h2 className="font-display font-semibold text-2xl sm:text-[27px] text-black">Interact to Unlock Rewards</h2>
+              </div>
+              <div className="flex gap-2">
+                <button className="h-12 w-12 rounded-full bg-white shadow-card grid place-items-center text-mauve hover:bg-mauve hover:text-white transition text-lg">←</button>
+                <button className="h-12 w-12 rounded-full bg-white shadow-card grid place-items-center text-mauve hover:bg-mauve hover:text-white transition text-lg">→</button>
               </div>
             </div>
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              {[
-                { status: "Open", title: "What's the highest note EJAE can sing?", type: "Trivia", reward: "100XP", image: null },
-                { status: "Open", title: "EJAE listening party + fan Q&A", type: "Event", reward: "500XP", image: "/images/artist/ejae-press.webp" },
-                { status: "Completed", title: "EJAE Trivia: Play to Earn Points and unlock achievements", type: "Trivia", reward: "500XP", image: "/images/artist/ejae-time-after-time.jpg" },
-              ].map((card, i) => (
-                <div key={i} className="card overflow-hidden">
-                  <div className="px-4 py-3 flex items-center justify-between border-b border-border/40">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1.5 ${card.status === "Completed" ? "bg-success/10 text-success" : "bg-brand-50 text-brand"}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${card.status === "Completed" ? "bg-success" : "bg-brand"}`} />
-                      {card.status}
-                    </span>
-                  </div>
-                  <div className="p-4">
-                    {card.image ? (
-                      <div className="relative h-40 rounded-xl overflow-hidden mb-3">
-                        <Image src={card.image} alt="" fill className="object-cover" />
-                      </div>
-                    ) : (
-                      <div className="space-y-2 mb-3">
-                        <p className="font-medium text-sm">{card.title}</p>
-                        {TRIVIA_OPTIONS.map((opt, j) => {
-                          let borderClass = "border-border/60 hover:border-brand/30";
-                          let bgClass = "";
-                          if (triviaAnswer) {
-                            if (opt === triviaAnswer) {
-                              if (opt === CORRECT_ANSWER) {
-                                borderClass = "border-success";
-                                bgClass = "bg-success/10";
-                              } else {
-                                borderClass = "border-red-500";
-                                bgClass = "bg-red-50";
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {ACTIVITY_CARDS.map((card, i) => {
+                const isCompleted = card.status === "Completed";
+                return (
+                  <div key={i} className="rounded-[32px] bg-white shadow-card overflow-hidden flex flex-col">
+                    {/* Status pill — both Open and Completed are MAUVE per Figma (no green) */}
+                    <div className="px-4 pt-4 pb-3 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-figmaGray font-display font-semibold text-[13px] text-black">
+                        {isCompleted ? (
+                          <span className="h-4 w-4 rounded-full bg-mauve grid place-items-center">
+                            <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4z" />
+                            </svg>
+                          </span>
+                        ) : (
+                          <span className="h-3 w-3 rounded-full border-2 border-black" />
+                        )}
+                        {card.status}
+                      </span>
+                      <button className="h-8 w-8 rounded-full bg-white border border-figmaGray hover:bg-figmaGray transition grid place-items-center text-black/50">
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                      </button>
+                    </div>
+                    <div className="px-4 pb-4 flex-1">
+                      {card.kind === "trivia" ? (
+                        <>
+                          <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug">{card.title}</p>
+                          <div className="space-y-2">
+                            {TRIVIA_OPTIONS.map((opt, j) => {
+                              let cls = "bg-figmaGray text-black hover:bg-mauve/10";
+                              if (triviaAnswer) {
+                                if (opt === triviaAnswer && opt === CORRECT_ANSWER) cls = "bg-mauve/10 text-mauve ring-1 ring-mauve";
+                                else if (opt === triviaAnswer) cls = "bg-red-50 text-red-600 ring-1 ring-red-400";
+                                else if (opt === CORRECT_ANSWER) cls = "bg-mauve/10 text-mauve ring-1 ring-mauve";
                               }
-                            } else if (opt === CORRECT_ANSWER) {
-                              // Show correct answer highlighted when user picks wrong
-                              borderClass = "border-success";
-                              bgClass = "bg-success/10";
-                            }
-                          }
-                          return (
-                            <div
-                              key={j}
-                              onClick={() => handleTriviaAnswer(opt)}
-                              className={`text-xs text-muted px-3 py-2 rounded-lg border ${borderClass} ${bgClass} cursor-pointer transition`}
-                            >
-                              {opt}
+                              return (
+                                <div
+                                  key={j}
+                                  onClick={() => handleTriviaAnswer(opt)}
+                                  className={`px-3 py-2.5 rounded-xl font-display font-medium text-sm cursor-pointer transition ${cls}`}
+                                >
+                                  {opt}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Stacked photo-card effect — layered, slightly rotated images per Figma */}
+                          <div className="relative h-52 mb-4 grid place-items-center">
+                            <div className="relative w-[60%] aspect-[4/5]">
+                              {/* Back card – rotated left */}
+                              <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card -rotate-[8deg] translate-x-[-8%] translate-y-[6%]">
+                                <Image src={card.image} alt="" fill className="object-cover" />
+                              </div>
+                              {/* Mid card – rotated right */}
+                              <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card rotate-[6deg] translate-x-[6%] translate-y-[-2%]">
+                                <Image src={card.image} alt="" fill className="object-cover" />
+                              </div>
+                              {/* Front card */}
+                              <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card-lg">
+                                <Image src={card.image} alt="" fill className="object-cover" />
+                              </div>
                             </div>
-                          );
-                        })}
+                          </div>
+                          <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug text-center">{card.title}</p>
+                          <button
+                            onClick={() => fireToast(`${card.cta} - check back soon!`)}
+                            className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white hover:bg-mauve-600"
+                          >
+                            {card.cta}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {/* Footer: Rewards (coin + XP) — Requirements removed per request */}
+                    <div className="px-4 py-3 flex items-center justify-between">
+                      <div>
+                        <div className="font-display font-semibold text-[13px] text-black mb-1">Rewards</div>
+                        <span className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1 border border-figmaGray">
+                          <GoldCoin size={16} />
+                          <span className="font-display font-semibold text-[13px] text-black">{card.reward}</span>
+                        </span>
                       </div>
-                    )}
-                    {card.image && (
-                      <>
-                        <p className="font-medium text-sm mb-2">{card.title}</p>
-                        <button className={`w-full py-2.5 rounded-xl text-sm font-semibold transition ${card.status === "Completed" ? "bg-success/10 text-success" : "bg-brand text-white hover:bg-brand-600"}`}>
-                          {card.status === "Completed" ? "Play Now" : "Check In Now"}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                  <div className="px-4 py-3 border-t border-border/40 flex items-center justify-between">
-                    <div>
-                      <div className="text-[10px] text-muted">Rewards</div>
-                      <span className="chip text-[10px] py-0.5 mt-0.5">{card.reward}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] text-muted">Requirements</div>
-                      <span className="text-[10px] text-muted mt-0.5">Free</span>
+                      <div className="text-right">
+                        <div className="font-display font-semibold text-[13px] text-black/40">Requirements</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         </>
@@ -432,141 +697,184 @@ export default function InteractiveLanding() {
       {/* ─── Announcements Tab Content ─── */}
       {activeTab === 2 && (
         <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-6">
-          <div className="rounded-2xl bg-white border border-border/60 shadow-card p-8 sm:p-12 text-center">
-            <div className="h-16 w-16 rounded-2xl bg-brand-50 grid place-items-center mx-auto mb-4">
-              <svg className="h-8 w-8 text-brand" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <div className="rounded-[32px] bg-white border border-mauve/20 p-12 text-center">
+            <div className="h-16 w-16 rounded-2xl bg-mauve/10 grid place-items-center mx-auto mb-4">
+              <svg className="h-8 w-8 text-mauve" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
               </svg>
             </div>
             <h3 className="font-display text-lg font-bold mb-2">No Announcements Yet</h3>
-            <p className="text-sm text-muted max-w-md mx-auto">
+            <p className="font-display text-sm text-black/60 max-w-md mx-auto">
               Stay tuned! EJAE will post announcements about upcoming releases, events, and exclusive fan content here.
             </p>
           </div>
         </section>
       )}
 
-      {/* ─── Rewards ─── (always visible, serves as scroll target for Rewards tab) */}
-      <section ref={rewardsSectionRef} className="mx-auto max-w-6xl px-4 sm:px-6 pt-6 sm:pt-8">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 className="font-display text-base sm:text-xl font-bold flex items-center gap-2">
-            <span className="text-brand">+</span> Rewards
-          </h2>
-          <div className="flex gap-1">
-            <button className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-border grid place-items-center text-muted hover:text-brand hover:border-brand transition text-sm">&larr;</button>
-            <button className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-border grid place-items-center text-muted hover:text-brand hover:border-brand transition text-sm">&rarr;</button>
+      {/* ─── Rewards (mauve cards) ─── */}
+      <section ref={rewardsSectionRef} className="mx-auto max-w-6xl px-4 sm:px-6 pt-8">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <SectionStar />
+            <h2 className="font-display font-semibold text-2xl sm:text-[27px] text-black">Rewards</h2>
+          </div>
+          <div className="flex gap-2">
+            <button className="h-12 w-12 rounded-full bg-white shadow-card grid place-items-center text-mauve hover:bg-mauve hover:text-white transition text-lg">←</button>
+            <button className="h-12 w-12 rounded-full bg-white shadow-card grid place-items-center text-mauve hover:bg-mauve hover:text-white transition text-lg">→</button>
           </div>
         </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-          {[
-            { title: "Limited Edition Merch", subtitle: "Tuesday, May 10 | 03:43", cta: "Claim Now", req: "1000XP", image: "/images/artist/ejae-press.webp" },
-            { title: "Discounted Tickets", subtitle: "Next tour presale access", cta: "Claim Now", req: "2000XP", image: "/images/artist/ejae-portrait.jpeg" },
-            { title: "Signed Set List", subtitle: "Personally autographed by EJAE", cta: "Claim Now", req: "4000XP", image: "/images/artist/ejae-time-after-time.jpg" },
-          ].map((card, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden bg-gradient-reward shadow-card text-white">
-              <div className="relative p-3">
-                <div className="h-44 relative rounded-xl overflow-hidden">
-                  <Image src={card.image} alt="" fill className="object-cover" />
-                </div>
-                <div className="absolute top-5 left-5">
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/90 text-[#3D2852] flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success" />Open
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {REWARDS.map((card, i) => {
+            const isFeatured = i === 0;
+            return (
+              <div key={i} className="rounded-[32px] bg-mauve shadow-card overflow-hidden flex flex-col text-white">
+                {/* Header: Open pill (white) + three-dot button (white) */}
+                <div className="px-4 pt-4 pb-3 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white font-display font-semibold text-[13px] text-black">
+                    <span className="h-3 w-3 rounded-full border-2 border-black" />
+                    Open
                   </span>
+                  <button
+                    aria-label="More options"
+                    className="h-8 w-8 rounded-full bg-white hover:bg-white/90 transition grid place-items-center text-black/60"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="5" cy="12" r="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <circle cx="19" cy="12" r="2" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Image area: featured card = single big picture; others = stacked photo cards */}
+                <div className="px-4 pb-4 flex-1">
+                  {isFeatured ? (
+                    <div className="relative h-52 rounded-2xl overflow-hidden mb-3 border border-figmaGray/40">
+                      <Image src={card.image} alt="" fill className="object-cover" />
+                    </div>
+                  ) : (
+                    <div className="relative h-52 mb-4 grid place-items-center">
+                      <div className="relative w-[60%] aspect-[4/5]">
+                        <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card border border-figmaGray/40 -rotate-[8deg] translate-x-[-8%] translate-y-[6%]">
+                          <Image src={card.image} alt="" fill className="object-cover" />
+                        </div>
+                        <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card border border-figmaGray/40 rotate-[6deg] translate-x-[6%] translate-y-[-2%]">
+                          <Image src={card.image} alt="" fill className="object-cover" />
+                        </div>
+                        <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card-lg border border-figmaGray/40">
+                          <Image src={card.image} alt="" fill className="object-cover" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Title + subtitle, centered, white */}
+                  <div className="text-center mb-3">
+                    <h3 className="font-display font-bold text-[17px] text-white leading-snug">{card.title}</h3>
+                    {card.subtitle && <p className="font-display font-medium text-sm text-white/70 mt-1">{card.subtitle}</p>}
+                  </div>
+
+                  {/* Claim Now button — inverted (white bg, mauve text) for contrast on dark card */}
+                  <button
+                    onClick={() => handleClaim(card.req)}
+                    className="w-full py-3 rounded-full bg-white text-mauve font-display font-bold text-sm hover:bg-white/90 transition"
+                  >
+                    Claim Now
+                  </button>
+                </div>
+
+                {/* Footer: Requirements with gold-coin XP pattern (white text on mauve) */}
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <div className="font-display font-semibold text-[13px] text-white mb-1">Requirements</div>
+                    <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full pl-1 pr-2.5 py-1">
+                      <GoldCoin size={16} />
+                      <span className="font-display font-semibold text-[13px] text-white">{card.req}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="px-4 pt-2 pb-4 text-center">
-                <h3 className="font-display font-bold text-sm uppercase tracking-wider">{card.title}</h3>
-                {card.subtitle && <p className="text-[11px] text-white/70 mt-0.5">{card.subtitle}</p>}
-                <button
-                  onClick={() => handleClaim(card.req)}
-                  className="w-full mt-3 py-2.5 rounded-xl bg-white text-[#3D2852] text-sm font-semibold hover:bg-white/90 transition"
-                >
-                  {card.cta}
-                </button>
-              </div>
-              <div className="px-4 py-3 border-t border-white/10 bg-black/10">
-                <div className="text-[10px] text-white/70">Requirements</div>
-                <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full bg-warning/20 text-warning text-[10px] font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-warning" />{card.req}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
       {/* ─── Link Apps ─── */}
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-10">
-        <h2 className="font-display text-base sm:text-xl font-bold flex items-center gap-2 mb-1">
-          <span className="text-brand">+</span> Link Apps
-        </h2>
-        <p className="text-xs sm:text-sm text-muted mb-4 sm:mb-5">Link your apps and use these hashtags so we can reward your fandom <span className="text-brand font-medium">#EJAE</span> <span className="text-brand font-medium">#TimeAfterTime</span></p>
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="flex items-center gap-3 mb-2">
+          <SectionStar />
+          <h2 className="font-display font-semibold text-2xl sm:text-[27px] text-black">Link Apps</h2>
+        </div>
+        <p className="font-display font-medium text-sm sm:text-base text-black/70 mb-5 ml-[60px]">
+          link your apps and use these hashtags so we can reward your fandom <span className="text-mauve font-semibold">#EJAE</span> <span className="text-mauve font-semibold">#TimeAfterTime</span>
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
               key: "spotify",
               name: "Spotify",
               placeholder: "yourusername",
-              pinkIcon: (
-                <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="#D88BA0"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.8.8 0 01-1.1.3c-3-1.8-6.8-2.2-11.3-1.2a.8.8 0 11-.3-1.5c4.9-1.1 9.1-.6 12.4 1.3.4.2.5.7.3 1.1zm1.2-2.7a1 1 0 01-1.3.3c-3.5-2.1-8.7-2.7-12.8-1.5a1 1 0 01-.6-1.9c4.6-1.4 10.4-.7 14.4 1.7.5.3.6.9.3 1.4zm.1-2.8C14 8.6 7.6 8.4 3.8 9.5a1.2 1.2 0 11-.7-2.3C7.6 5.9 14.7 6.1 19.1 8.7a1.2 1.2 0 01-1.2 2.2z"/></svg>
-              ),
-              smallIcon: (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="#D88BA0"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.8.8 0 01-1.1.3c-3-1.8-6.8-2.2-11.3-1.2a.8.8 0 11-.3-1.5c4.9-1.1 9.1-.6 12.4 1.3.4.2.5.7.3 1.1zm1.2-2.7a1 1 0 01-1.3.3c-3.5-2.1-8.7-2.7-12.8-1.5a1 1 0 01-.6-1.9c4.6-1.4 10.4-.7 14.4 1.7.5.3.6.9.3 1.4zm.1-2.8C14 8.6 7.6 8.4 3.8 9.5a1.2 1.2 0 11-.7-2.3C7.6 5.9 14.7 6.1 19.1 8.7a1.2 1.2 0 01-1.2 2.2z"/></svg>
+              icon: (
+                <img
+                  src="/images/icons/spotify.svg"
+                  alt="Spotify"
+                  className="h-20 w-20 sm:h-24 sm:w-24 transition-transform group-hover:scale-110"
+                />
               ),
             },
             {
               key: "tiktok",
               name: "TikTok",
               placeholder: "yourhandle",
-              pinkIcon: (
-                <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="#D88BA0"><path d="M20 8.3a6.7 6.7 0 01-4-1.3v7.7a5.7 5.7 0 11-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 102 2.8V2h2.8A4.2 4.2 0 0020 6.1v2.2z"/></svg>
-              ),
-              smallIcon: (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="#D88BA0"><path d="M20 8.3a6.7 6.7 0 01-4-1.3v7.7a5.7 5.7 0 11-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 102 2.8V2h2.8A4.2 4.2 0 0020 6.1v2.2z"/></svg>
+              icon: (
+                <svg viewBox="0 0 24 24" className="h-20 w-20 sm:h-24 sm:w-24 transition-transform group-hover:scale-110" fill="#cfa29f">
+                  <path d="M20 8.3a6.7 6.7 0 01-4-1.3v7.7a5.7 5.7 0 11-5.7-5.7c.3 0 .6 0 .9.1v2.8a2.9 2.9 0 102 2.8V2h2.8A4.2 4.2 0 0020 6.1v2.2z"/>
+                </svg>
               ),
             },
             {
               key: "instagram",
               name: "Instagram",
               placeholder: "yourhandle",
-              pinkIcon: (
-                <svg viewBox="0 0 24 24" className="h-10 w-10 sm:h-16 sm:w-16 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" fill="none" stroke="#D88BA0" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="#D88BA0"/></svg>
-              ),
-              smallIcon: (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#D88BA0" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="#D88BA0"/></svg>
+              icon: (
+                <svg viewBox="0 0 24 24" className="h-20 w-20 sm:h-24 sm:w-24 transition-transform group-hover:scale-110" fill="none" stroke="#cfa29f" strokeWidth="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="5"/>
+                  <circle cx="12" cy="12" r="4.5"/>
+                  <circle cx="17.5" cy="6.5" r="1.2" fill="#cfa29f"/>
+                </svg>
               ),
             },
           ].map((app) => {
-            const linkedHandle = linkedApps[app.key];
+            const linked = linkedApps[app.key];
             return (
               <button
                 key={app.key}
                 type="button"
-                onClick={() => handleOpenLinkModal({ ...app, icon: app.smallIcon })}
-                className={`card-hover flex flex-col items-center justify-center py-6 sm:py-10 group relative ${linkedHandle ? "ring-2 ring-success/50" : ""}`}
+                onClick={() => handleOpenLinkModal({ ...app })}
+                className={`group bg-white rounded-[32px] flex flex-col items-center justify-center py-10 hover:shadow-card-lg shadow-card transition-all relative ${linked ? "ring-2 ring-success/50" : ""}`}
               >
-                {linkedHandle && (
-                  <span className="absolute top-2 right-2 h-5 w-5 rounded-full bg-success text-white text-[10px] grid place-items-center" title="Linked">
+                {linked && (
+                  <span className="absolute top-3 right-3 h-6 w-6 rounded-full bg-success text-white text-xs grid place-items-center" title="Linked">
                     ✓
                   </span>
                 )}
-                {app.pinkIcon}
-                <div className="font-display font-semibold text-xs sm:text-base">{app.name}</div>
-                {linkedHandle ? (
+                {app.icon}
+                <div className="font-display font-bold text-base text-black mt-3">{app.name}</div>
+                {linked ? (
                   <>
-                    <div className="text-[10px] sm:text-xs text-success font-medium mt-0.5">@{linkedHandle}</div>
+                    <div className="font-display font-medium text-xs text-success mt-1">@{linked}</div>
                     <span
                       role="button"
                       tabIndex={0}
                       onClick={(e) => { e.stopPropagation(); handleUnlinkApp(app.key); }}
                       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); handleUnlinkApp(app.key); } }}
-                      className="text-[10px] text-muted mt-1 hover:text-brand transition"
+                      className="font-display font-medium text-[11px] text-black/50 mt-1 hover:text-mauve transition"
                     >
                       Unlink
                     </span>
                   </>
                 ) : (
-                  <div className="text-[10px] sm:text-xs text-muted mt-0.5">Tap to link</div>
+                  <div className="font-display font-medium text-xs text-black/50 mt-1">Tap to link</div>
                 )}
               </button>
             );
@@ -574,7 +882,6 @@ export default function InteractiveLanding() {
         </div>
       </section>
 
-      {/* ─── Modals & Toast ─── */}
       <LinkAppModal
         open={!!linkModalApp}
         app={linkModalApp}

@@ -5,13 +5,20 @@ import { useChat } from "@/components/ChatProvider";
 
 /* ─── Room data ─── */
 const ROOMS = [
-  { id: 1, name: "EJAE Official Fan Club", members: 89, online: 12, color: "bg-brand", host: "Amanda", newMessages: 12 },
-  { id: 2, name: "Stan Club", members: 45, online: 8, color: "bg-lavender-400", host: "Jenny", newMessages: 7 },
-  { id: 3, name: "New Music Discussion", members: 34, online: 5, color: "bg-brand-400", host: "Marco", newMessages: 4 },
-  { id: 4, name: "Concert Meetups", members: 28, online: 3, color: "bg-lavender-500", host: "Lauren", newMessages: 9 },
+  { id: 1, name: "EJAE Official Fan Club", members: 20000, online: 1067, color: "bg-mauve", host: "Amanda", newMessages: 1067 },
+  { id: 2, name: "Stan Club", members: 4500, online: 312, color: "bg-mauve-400", host: "Jenny", newMessages: 87 },
+  { id: 3, name: "New Music Discussion", members: 3400, online: 154, color: "bg-mauve-300", host: "Marco", newMessages: 42 },
+  { id: 4, name: "Concert Meetups", members: 2800, online: 88, color: "bg-mauve-500", host: "Lauren", newMessages: 19 },
 ];
 
 const TOTAL_ONLINE = ROOMS.reduce((sum, r) => sum + r.online, 0);
+
+// Per-user XP awarded for chat activity (matches Figma)
+const USER_XP = {
+  Jacques: 50, Lauren: 50, Kristine: 30, Marco: 25, Alex: 50,
+  Jenny: 50, Devon: 30, Talia: 25, Amanda: 100, Pierre: 75,
+};
+function getUserXP(name) { return USER_XP[name] ?? 25; }
 
 /* ─── Demo users ─── */
 const DEMO_USERS = [
@@ -214,7 +221,7 @@ export default function ChatDrawer() {
       {!isOpen && (
         <button
           onClick={openChat}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-brand text-white shadow-card-lg hover:bg-brand-600 hover:shadow-glow grid place-items-center transition-all duration-200 active:scale-95"
+          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-mauve text-white shadow-card-lg hover:bg-mauve-600 hover:shadow-glow grid place-items-center transition-all duration-200 active:scale-95"
           aria-label="Open chat rooms"
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -279,7 +286,7 @@ export default function ChatDrawer() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span className="text-sm font-medium text-muted">{TOTAL_ONLINE} online</span>
+              <span className="text-sm font-medium text-muted">{TOTAL_ONLINE.toLocaleString()} online</span>
             </div>
           </div>
 
@@ -307,7 +314,7 @@ export default function ChatDrawer() {
               <button
                 key={room.id}
                 onClick={() => enterRoom(room.id)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-brand-50/60 hover:bg-brand-50 border border-brand/10 transition-all duration-200 group hover:shadow-sm"
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-mauve/5 hover:bg-mauve/10 border border-mauve/10 transition-all duration-200 group hover:shadow-sm"
               >
                 {/* Room avatar */}
                 <div
@@ -321,13 +328,13 @@ export default function ChatDrawer() {
                     {room.name}
                   </div>
                   <div className="text-[11px] text-muted mt-0.5">
-                    {room.members} members &middot;{" "}
-                    <span className="text-success">{room.online} online</span>
+                    {room.members.toLocaleString()} members &middot;{" "}
+                    <span className="text-success">{room.online.toLocaleString()} online</span>
                   </div>
                 </div>
                 {/* Chevron */}
                 <svg
-                  className="h-4 w-4 text-muted group-hover:text-brand transition shrink-0"
+                  className="h-4 w-4 text-muted group-hover:text-mauve transition shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={2}
@@ -367,8 +374,8 @@ export default function ChatDrawer() {
                 {currentRoom?.name || "Chat"}
               </div>
               <div className="text-[11px] text-muted">
-                {currentRoom?.members} members &middot;{" "}
-                <span className="text-success">{currentRoom?.online} online</span>
+                {currentRoom?.members.toLocaleString()} members &middot;{" "}
+                <span className="text-success">{currentRoom?.online.toLocaleString()} online</span>
               </div>
             </div>
             <span className="chip text-[10px] py-0.5">
@@ -391,15 +398,15 @@ export default function ChatDrawer() {
           {/* Room summary card */}
           {currentRoom && (
             <div className="px-4 pt-3 shrink-0">
-              <div className="rounded-2xl bg-surface2 p-4 space-y-2.5">
-                <div className="font-display font-bold text-[15px] tracking-tight uppercase text-text">
+              <div className="rounded-2xl bg-figmaGray p-4 space-y-2.5">
+                <div className="font-display font-bold text-[15px] tracking-tight uppercase text-black">
                   {currentRoom.name}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center h-6 min-w-[28px] px-1.5 rounded-md bg-[#2D1B4E] text-white text-[11px] font-bold">
-                    {currentRoom.newMessages}
+                  <span className="inline-flex items-center justify-center h-6 min-w-[28px] px-1.5 rounded-md bg-mauve text-white text-[11px] font-bold">
+                    {currentRoom.newMessages.toLocaleString()}
                   </span>
-                  <span className="text-xs text-text">New Messages</span>
+                  <span className="text-xs text-black">New Messages</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <img
@@ -407,7 +414,7 @@ export default function ChatDrawer() {
                     alt={currentRoom.host}
                     className="h-6 w-6 rounded-full object-cover"
                   />
-                  <span className="text-xs text-text">Hosted by {currentRoom.host}</span>
+                  <span className="text-xs text-black">Hosted by {currentRoom.host}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
@@ -416,41 +423,52 @@ export default function ChatDrawer() {
                         key={u}
                         src={`https://i.pravatar.cc/48?u=${u}`}
                         alt=""
-                        className="h-6 w-6 rounded-full object-cover ring-2 ring-surface2"
+                        className="h-6 w-6 rounded-full object-cover ring-2 ring-figmaGray"
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-text">{currentRoom.members} Members</span>
+                  <span className="text-xs text-black">{currentRoom.members.toLocaleString()} People</span>
                 </div>
               </div>
             </div>
           )}
 
           {/* Messages */}
-          <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 bg-bg/50">
+          <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 bg-white">
             {currentMessages.map((m) => {
               const isMe = m.isGuest;
               const user = isMe ? null : getUserByName(m.userName);
               const name = isMe ? "You" : m.userName;
+              const userXp = isMe ? null : getUserXP(name);
               return (
                 <div key={m.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
                   <div
-                    className={`h-7 w-7 shrink-0 rounded-full overflow-hidden ${isMe ? "ring-2 ring-brand" : ""}`}
+                    className={`h-7 w-7 shrink-0 rounded-full overflow-hidden ${isMe ? "ring-2 ring-mauve" : ""}`}
                   >
                     <img src={`https://i.pravatar.cc/56?u=${isMe ? "guest" : name.toLowerCase()}`} alt={name} className="h-full w-full object-cover" />
                   </div>
                   <div className={`max-w-[78%] ${isMe ? "text-right" : ""}`}>
-                    <div className="flex items-baseline gap-1.5 mb-0.5">
-                      <span className={`text-[11px] font-medium ${isMe ? "text-brand" : "text-muted"}`}>
+                    <div className={`flex items-center gap-1.5 mb-0.5 ${isMe ? "justify-end" : ""}`}>
+                      <span className={`text-[11px] font-display font-medium ${isMe ? "text-mauve" : "text-black"}`}>
                         {name}
                       </span>
-                      <span className="text-[9px] text-muted/50">{getTimestamp(m.createdAt)}</span>
+                      {!isMe && userXp != null && (
+                        <span className="inline-flex items-center gap-1 bg-white border border-figmaGray rounded-full pl-0.5 pr-2 py-0.5 font-display font-semibold text-[11px] text-black">
+                          <span
+                            className="inline-block h-3 w-3 rounded-full ring-[0.5px] ring-black/40 shrink-0"
+                            style={{ background: "linear-gradient(135deg, #ffca17 0%, #977400 100%)" }}
+                            aria-hidden="true"
+                          />
+                          {userXp}XP
+                        </span>
+                      )}
+                      <span className="text-[9px] text-muted/60">{getTimestamp(m.createdAt)}</span>
                     </div>
                     <div
                       className={`inline-block rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
                         isMe
-                          ? "bg-brand text-white rounded-br-md"
-                          : "bg-white border border-border/60 rounded-bl-md shadow-sm"
+                          ? "bg-mauve text-white rounded-br-md"
+                          : "bg-figmaGray text-black rounded-bl-md"
                       }`}
                     >
                       {m.body}
@@ -472,7 +490,7 @@ export default function ChatDrawer() {
             />
             <button
               disabled={!body.trim()}
-              className="btn-primary px-4 py-2.5 disabled:opacity-40 disabled:shadow-none"
+              className="inline-flex items-center justify-center bg-mauve text-white rounded-xl px-4 py-2.5 hover:bg-mauve-600 transition disabled:opacity-40"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
