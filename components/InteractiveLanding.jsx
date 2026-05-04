@@ -793,8 +793,8 @@ export default function InteractiveLanding() {
                       <Image src={card.image} alt="" fill className="object-cover" />
                     </div>
                   ) : (
-                    <div className="relative h-52 mb-4 grid place-items-center">
-                      <div className="relative w-[60%] aspect-[4/5]">
+                    <div className="relative h-44 sm:h-52 mb-4 grid place-items-center">
+                      <div className="relative w-[40%] sm:w-[60%] aspect-[4/5] max-h-full">
                         <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card border border-figmaGray/40 -rotate-[8deg] translate-x-[-8%] translate-y-[6%]">
                           <Image src={card.image} alt="" fill className="object-cover" />
                         </div>
