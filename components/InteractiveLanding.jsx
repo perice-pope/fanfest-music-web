@@ -207,12 +207,13 @@ export default function InteractiveLanding() {
 
   return (
     <>
-      {/* ─── Sub-nav: Mauve ovals matching Figma exactly ─── */}
+      {/* ─── Sub-nav: Mauve ovals matching Figma exactly ───
+           Mobile: only the Chat Rooms pill (full width) is shown. Tabs + Admin Portal appear from md+. */}
       <div className="bg-bg pt-5 pb-2">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            {/* Left: Activities / Rewards / Announcements in one mauve oval */}
-            <div className="inline-flex items-center bg-mauve rounded-full p-1 shrink-0">
+            {/* Activities / Rewards / Announcements – HIDDEN on mobile */}
+            <div className="hidden md:inline-flex items-center bg-mauve rounded-full p-1 shrink-0">
               {TABS.map((tab, i) => (
                 <button
                   key={tab}
@@ -228,23 +229,34 @@ export default function InteractiveLanding() {
               ))}
             </div>
 
-            {/* Right group: Chat Rooms (mauve) + Admin Portal (peach) */}
-            <div className="flex items-center gap-3 ml-auto">
+            {/* Right group: Chat Rooms (visible on all sizes) + Admin Portal (md+ only) */}
+            <div className="flex items-center gap-3 w-full md:w-auto md:ml-auto">
               <button
                 onClick={openChat}
-                className="inline-flex items-center gap-2.5 bg-mauve text-white rounded-full pl-3 pr-2 py-2 hover:bg-mauve-600 transition"
+                className="inline-flex flex-1 md:flex-none items-center justify-between md:justify-start gap-2.5 bg-mauve text-white rounded-full pl-3 pr-2 py-2 hover:bg-mauve-600 transition"
               >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.62 1.31 4.96 3.39 6.55-.05.93-.34 2.36-1.39 3.65 0 0 2.51-.36 4.55-1.71.74.18 1.52.31 2.32.36.38.03.76.05 1.13.05 5.52 0 10-3.94 10-8.8S17.52 2 12 2z" />
-                </svg>
-                <span className="font-display font-semibold uppercase text-[13px] sm:text-sm tracking-wide">Chat Rooms</span>
-                <span className="inline-flex items-center justify-center h-7 min-w-[28px] px-1.5 rounded-md bg-white text-mauve font-display font-bold text-base">
-                  4
+                <span className="inline-flex items-center gap-2.5">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.62 1.31 4.96 3.39 6.55-.05.93-.34 2.36-1.39 3.65 0 0 2.51-.36 4.55-1.71.74.18 1.52.31 2.32.36.38.03.76.05 1.13.05 5.52 0 10-3.94 10-8.8S17.52 2 12 2z" />
+                  </svg>
+                  <span className="font-display font-semibold uppercase text-[13px] sm:text-sm tracking-wide">Chat Rooms</span>
+                  <span className="inline-flex items-center justify-center h-7 min-w-[28px] px-1.5 rounded-md bg-white text-mauve font-display font-bold text-base">
+                    4
+                  </span>
+                </span>
+                {/* Mobile-only: avatar stack on the right side of Chat Rooms pill */}
+                <span className="md:hidden flex -space-x-2">
+                  {["jacques", "lauren", "kristine"].map((u) => (
+                    <span key={u} className="h-7 w-7 rounded-full overflow-hidden ring-2 ring-mauve">
+                      <img src={`https://i.pravatar.cc/56?u=${u}`} alt="" className="h-full w-full object-cover" />
+                    </span>
+                  ))}
                 </span>
               </button>
+              {/* Admin Portal – HIDDEN on mobile */}
               <Link
                 href="/dashboard"
-                className="inline-flex items-center bg-peach text-white rounded-full px-5 py-2.5 hover:bg-peach-light hover:text-mauve transition font-display font-bold uppercase text-[13px] sm:text-sm tracking-wide"
+                className="hidden md:inline-flex items-center bg-peach text-white rounded-full px-5 py-2.5 hover:bg-peach-light hover:text-mauve transition font-display font-bold uppercase text-[13px] sm:text-sm tracking-wide"
               >
                 Admin Portal
               </Link>
@@ -287,22 +299,25 @@ export default function InteractiveLanding() {
           */}
           <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-5">
             <div className="relative rounded-[32px] overflow-hidden bg-figmaGray">
-              {/* Top section with banner image background — uses the Figma exported eyes banner */}
-              <div className="relative">
+              {/* Top section with banner image background — uses the Figma exported eyes banner.
+                   Mobile (per Figma): NO banner image; the section uses plain figmaGray bg with dark text. */}
+              <div className="relative bg-figmaGray md:bg-transparent">
+                {/* Banner image — hidden on mobile per Figma mobile mockup */}
                 <Image
                   src="/images/artist/ejae-eyes-banner.png"
                   alt="EJAE"
                   width={1408}
                   height={274}
-                  className="w-full h-[274px] object-cover"
+                  className="hidden md:block w-full h-[274px] object-cover"
                   style={{ objectPosition: "center center" }}
                   priority
                 />
-                {/* Subtle dark overlay for legibility */}
-                <div className="absolute inset-0 bg-black/20" />
+                {/* Subtle dark overlay for legibility — only when image is shown */}
+                <div className="hidden md:block absolute inset-0 bg-black/20" />
 
-                {/* Overlay content: profile pill row + 3-column stats grid */}
-                <div className="absolute inset-0 p-8 flex flex-col gap-8">
+                {/* Overlay content: profile pill row + stats grid.
+                     Desktop: absolute over the image. Mobile: relative inside the gray section. */}
+                <div className="md:absolute md:inset-0 p-6 sm:p-8 flex flex-col gap-6 md:gap-8">
                   {/* Top row: Profile pill (left) + Join Fan Club CTA (right) */}
                   <div className="flex items-start justify-between gap-4">
                     {/* Per Figma node 107:2144 — NO pill background. Just a solid mauve avatar circle + floating white text */}
@@ -316,8 +331,8 @@ export default function InteractiveLanding() {
                         </div>
                       </div>
                       <div className="flex flex-col justify-center">
-                        <span className="font-display font-medium text-sm text-white leading-tight uppercase tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">Pierre</span>
-                        <span className="font-display font-medium text-[13px] text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">View Profile</span>
+                        <span className="font-display font-medium text-sm text-black md:text-white leading-tight uppercase tracking-wide md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">Pierre</span>
+                        <span className="font-display font-medium text-[13px] text-black/70 md:text-white leading-tight md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">View Profile</span>
                       </div>
                     </Link>
                     <Link
@@ -332,7 +347,7 @@ export default function InteractiveLanding() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-4 mt-auto">
                     {/* COLUMN 1: TOTAL XP EARNED */}
                     <div className="flex flex-col gap-3">
-                      <div className="font-display font-semibold text-[15px] text-white uppercase tracking-wide">Total XP earned</div>
+                      <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Total XP earned</div>
                       <div className="flex items-center gap-3">
                         {/* 150XP white pill with gold coin */}
                         <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
@@ -368,7 +383,7 @@ export default function InteractiveLanding() {
 
                     {/* COLUMN 2: MEMBERSHIP / WALLET */}
                     <div className="flex flex-col gap-3">
-                      <div className="font-display font-semibold text-[15px] text-white uppercase tracking-wide">Membership / Wallet</div>
+                      <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Membership / Wallet</div>
                       <div>
                         {/* VIP white pill with mauve star icon (matches Figma star indicator) */}
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1.5 pr-2.5 py-1">
@@ -384,7 +399,7 @@ export default function InteractiveLanding() {
 
                     {/* COLUMN 3: SUPERFAN+ */}
                     <div className="flex flex-col gap-3">
-                      <div className="font-display font-semibold text-[15px] text-white uppercase tracking-wide">Superfan+</div>
+                      <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Superfan+</div>
                       <div>
                         {/* ACTIVE white pill with the official gold-coin icon (Figma asset) */}
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1">
@@ -654,8 +669,8 @@ export default function InteractiveLanding() {
                       ) : (
                         <>
                           {/* Stacked photo-card effect — layered, slightly rotated images per Figma */}
-                          <div className="relative h-52 mb-4 grid place-items-center">
-                            <div className="relative w-[60%] aspect-[4/5]">
+                          <div className="relative h-44 sm:h-52 mb-4 grid place-items-center">
+                            <div className="relative w-[40%] sm:w-[60%] aspect-[4/5] max-h-full">
                               {/* Back card – rotated left */}
                               <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-card -rotate-[8deg] translate-x-[-8%] translate-y-[6%]">
                                 <Image src={card.image} alt="" fill className="object-cover" />
@@ -756,7 +771,7 @@ export default function InteractiveLanding() {
                 {/* Image area: featured card = single big picture; others = stacked photo cards */}
                 <div className="px-4 pb-4 flex-1">
                   {isFeatured ? (
-                    <div className="relative h-52 rounded-2xl overflow-hidden mb-3 border border-figmaGray/40">
+                    <div className="relative h-36 sm:h-52 rounded-2xl overflow-hidden mb-3 border border-figmaGray/40">
                       <Image src={card.image} alt="" fill className="object-cover" />
                     </div>
                   ) : (
