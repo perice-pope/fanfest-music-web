@@ -318,13 +318,11 @@ export default function InteractiveLanding() {
                 {/* Overlay content: profile pill row + stats grid.
                      Desktop: absolute over the image. Mobile: relative inside the gray section. */}
                 <div className="md:absolute md:inset-0 p-6 sm:p-8 flex flex-col gap-6 md:gap-8">
-                  {/* Top row: Profile pill (left) + Join Fan Club CTA (right) */}
-                  <div className="flex items-start justify-between gap-4">
-                    {/* Per Figma node 107:2144 — NO pill background. Just a solid mauve avatar circle + floating white text */}
-                    <Link
-                      href="/profile"
-                      className="inline-flex items-center gap-3 group"
-                    >
+                  {/* Top row.
+                       Mobile (Figma 107:7363): avatar + PIERRE name on left, XP coin + 75% pill on right.
+                       Desktop: avatar pill on left, Join Fan Club CTA on right. */}
+                  <div className="flex items-center justify-between gap-3">
+                    <Link href="/profile" className="inline-flex items-center gap-3 group">
                       <div className="h-[50px] w-[50px] rounded-full bg-mauve grid place-items-center shrink-0">
                         <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-figmaGray">
                           <img src="/images/users/pierre.png" alt="Pierre" className="h-full w-full object-cover" />
@@ -332,9 +330,21 @@ export default function InteractiveLanding() {
                       </div>
                       <div className="flex flex-col justify-center">
                         <span className="font-display font-medium text-sm text-black md:text-white leading-tight uppercase tracking-wide md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">Pierre</span>
-                        <span className="font-display font-medium text-[13px] text-black/70 md:text-white leading-tight md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">View Profile</span>
+                        {/* "View Profile" only on desktop per Figma mobile mockup */}
+                        <span className="hidden md:inline font-display font-medium text-[13px] text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">View Profile</span>
                       </div>
                     </Link>
+
+                    {/* Mobile-only: XP coin pill + 75% percent pill on the right of PIERRE */}
+                    <div className="flex md:hidden items-center gap-2">
+                      <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
+                        <GoldCoin size={16} />
+                        <span className={`font-display font-semibold text-[13px] text-black transition-all ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
+                      </div>
+                      <span className="inline-flex items-center bg-white rounded-full px-3 py-1 font-display font-semibold text-[13px] text-black">75%</span>
+                    </div>
+
+                    {/* Desktop-only: Join Fan Club CTA on the right */}
                     <Link
                       href="/signup"
                       className="hidden md:inline-flex bg-white text-mauve hover:bg-mauve hover:text-white transition rounded-full px-6 py-3 font-display font-bold uppercase text-sm tracking-wide shadow-card"
@@ -343,32 +353,27 @@ export default function InteractiveLanding() {
                     </Link>
                   </div>
 
-                  {/* 3-column stats grid: each column has title + status row + action button */}
+                  {/* Stats sections — desktop is 3 columns, mobile is stacked vertical sections.
+                       Each section: title + status pill (side-by-side on mobile, stacked on desktop), then action button. */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-4 mt-auto">
-                    {/* COLUMN 1: TOTAL XP EARNED */}
+                    {/* SECTION 1: TOTAL XP EARNED — on mobile, only shows the Invite friends button (xp/quests are in the PIERRE row above) */}
                     <div className="flex flex-col gap-3">
-                      <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Total XP earned</div>
-                      <div className="flex items-center gap-3">
-                        {/* 150XP white pill with gold coin */}
-                        <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
-                          <GoldCoin size={16} />
-                          <span className={`font-display font-semibold text-[13px] text-black transition-all ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
-                        </div>
-                        {/* 4/5 Quests Completed — progress-bar style (Figma 107:2161):
-                            WHITE outer (244x32) → DARK PURPLE fill ~80% from left → LIGHT PURPLE label
-                            inside the filled portion → empty WHITE tail on the right (the unfilled 20%). */}
-                        <div className="flex items-center bg-white rounded-full p-[2px] h-8 w-[244px] max-w-full">
-                          {/* Dark purple progress fill — extends visibly past the light purple inner pill;
-                              the light purple is sized to fit just the text so dark purple shows on the right,
-                              and a WHITE tail follows for the unfilled portion. */}
-                          <div className="flex items-center justify-start bg-mauve rounded-full pl-[2px] pr-3 py-[2px] h-full" style={{ width: "calc(100% * 0.85)" }}>
-                            <span className="inline-flex items-center justify-center bg-mauve-200 rounded-full h-full px-3 font-display font-semibold text-[13px] text-black whitespace-nowrap">
-                              4/5 Quests Completed
-                            </span>
+                      <div className="hidden md:flex md:flex-col md:gap-3">
+                        <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Total XP earned</div>
+                        <div className="flex items-center gap-3">
+                          <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
+                            <GoldCoin size={16} />
+                            <span className={`font-display font-semibold text-[13px] text-black transition-all ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
+                          </div>
+                          <div className="flex items-center bg-white rounded-full p-[2px] h-8 w-[244px] max-w-full">
+                            <div className="flex items-center justify-start bg-mauve rounded-full pl-[2px] pr-3 py-[2px] h-full" style={{ width: "calc(100% * 0.85)" }}>
+                              <span className="inline-flex items-center justify-center bg-mauve-200 rounded-full h-full px-3 font-display font-semibold text-[13px] text-black whitespace-nowrap">
+                                4/5 Quests Completed
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      {/* Big white pill button: Invite friends + 200XP coin badge */}
                       <button
                         onClick={handleInvite}
                         className="bg-white hover:bg-white/90 transition rounded-full pl-5 pr-1 py-1 flex items-center justify-between h-[50px]"
@@ -381,33 +386,29 @@ export default function InteractiveLanding() {
                       </button>
                     </div>
 
-                    {/* COLUMN 2: MEMBERSHIP / WALLET */}
+                    {/* SECTION 2: MEMBERSHIP / WALLET — title+pill on same row on mobile (justify-between), stacked on desktop */}
                     <div className="flex flex-col gap-3">
-                      <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Membership / Wallet</div>
-                      <div>
-                        {/* VIP white pill with mauve star icon (matches Figma star indicator) */}
+                      <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
+                        <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Membership / Wallet</div>
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1.5 pr-2.5 py-1">
                           <img src="/images/icons/star.svg" alt="" className="h-3.5 w-3.5" />
                           <span className="font-display font-semibold text-[13px] text-black">VIP</span>
                         </div>
                       </div>
-                      {/* Big white pill button: Upgrade / Top up */}
                       <button className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black">
                         Upgrade / Top up
                       </button>
                     </div>
 
-                    {/* COLUMN 3: SUPERFAN+ */}
+                    {/* SECTION 3: SUPERFAN+ — title+pill on same row on mobile (justify-between), stacked on desktop */}
                     <div className="flex flex-col gap-3">
-                      <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Superfan+</div>
-                      <div>
-                        {/* ACTIVE white pill with the official gold-coin icon (Figma asset) */}
+                      <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
+                        <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Superfan+</div>
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1">
                           <img src="/images/icons/active-coin.png" alt="" className="h-4 w-4" />
                           <span className="font-display font-semibold text-[13px] text-black">ACTIVE</span>
                         </div>
                       </div>
-                      {/* Big white pill button: See Benefits */}
                       <button className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black">
                         See Benefits
                       </button>
