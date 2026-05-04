@@ -255,9 +255,7 @@ export default function InteractiveLanding() {
                 className="inline-flex flex-1 md:flex-none items-center justify-between md:justify-start gap-2.5 bg-mauve text-white rounded-full pl-3 pr-2 py-2 hover:bg-mauve-600 transition"
               >
                 <span className="inline-flex items-center gap-2.5">
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.62 1.31 4.96 3.39 6.55-.05.93-.34 2.36-1.39 3.65 0 0 2.51-.36 4.55-1.71.74.18 1.52.31 2.32.36.38.03.76.05 1.13.05 5.52 0 10-3.94 10-8.8S17.52 2 12 2z" />
-                  </svg>
+                  <img src="/images/icons/chat-bubble.png" alt="" className="h-7 w-7 shrink-0" />
                   <span className="font-display font-semibold uppercase text-[13px] sm:text-sm tracking-wide">Chat Rooms</span>
                   <span className="inline-flex items-center justify-center h-7 min-w-[28px] px-1.5 rounded-md bg-white text-mauve font-display font-bold text-base">
                     4
@@ -487,11 +485,11 @@ export default function InteractiveLanding() {
                         </div>
                       </div>
                       <div className="w-full flex flex-col items-center text-center">
-                        {/* Boosted members get a mauve pill with a star icon next to their name (per Figma — e.g. Max) */}
+                        {/* Boosted members get a mauve pill with a boxed-star badge next to their name (per Figma — e.g. Max) */}
                         {m.boosted ? (
-                          <div className="inline-flex items-center gap-1 bg-mauve rounded-full pl-2 pr-1.5 py-0.5">
+                          <div className="inline-flex items-center gap-1.5 bg-mauve rounded-full pl-2 pr-1.5 py-0.5">
                             <span className="font-display font-medium text-sm text-white">{m.name}</span>
-                            <img src="/images/icons/star.svg" alt="" className="h-3 w-3 brightness-0 invert" />
+                            <BoxedStar size={14} />
                           </div>
                         ) : (
                           <div className="font-display font-medium text-sm text-black px-1 py-0.5">{m.name}</div>
