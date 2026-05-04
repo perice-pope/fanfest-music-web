@@ -414,7 +414,7 @@ export default function InteractiveLanding() {
 
                     {/* SECTION 2: MEMBERSHIP / WALLET — title (left) + VIP pill (right) on same row, button below */}
                     <div className="flex flex-col gap-3">
-                      <div className="flex flex-row items-center justify-between gap-3">
+                      <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
                         <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Membership / Wallet</div>
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1.5 pr-2.5 py-1">
                           <BoxedStar size={16} />
@@ -428,7 +428,7 @@ export default function InteractiveLanding() {
 
                     {/* SECTION 3: SUPERFAN+ — title (left) + ACTIVE pill (right) on same row, button below */}
                     <div className="flex flex-col gap-3">
-                      <div className="flex flex-row items-center justify-between gap-3">
+                      <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
                         <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Superfan+</div>
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1">
                           <img src="/images/icons/active-coin.png" alt="" className="h-4 w-4" />
