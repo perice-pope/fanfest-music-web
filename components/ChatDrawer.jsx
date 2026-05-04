@@ -217,11 +217,11 @@ export default function ChatDrawer() {
 
   return (
     <>
-      {/* ── Floating Chat Button ── */}
+      {/* ── Floating Chat Button — hidden on mobile (mobile uses the Chat Rooms pill at the top) ── */}
       {!isOpen && (
         <button
           onClick={openChat}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-mauve text-white shadow-card-lg hover:bg-mauve-600 hover:shadow-glow grid place-items-center transition-all duration-200 active:scale-95"
+          className="hidden md:grid fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-mauve text-white shadow-card-lg hover:bg-mauve-600 hover:shadow-glow place-items-center transition-all duration-200 active:scale-95"
           aria-label="Open chat rooms"
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

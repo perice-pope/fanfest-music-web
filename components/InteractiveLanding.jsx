@@ -105,6 +105,25 @@ const GoldCoin = ({ size = 16 }) => (
   />
 );
 
+// Boxed star badge (Figma dev mode: 2px radius, light-gray-to-light-blue gradient bg,
+// subtle shadow, contains the mauve star vector). Used for VIP pill, "You" leaderboard, etc.
+const BoxedStar = ({ size = 16 }) => (
+  <span
+    className="inline-flex items-center justify-center shrink-0"
+    style={{
+      width: size,
+      height: size,
+      padding: 2,
+      borderRadius: 2,
+      background: "linear-gradient(180deg, #F3F3F3 0%, rgba(173, 211, 241, 0.95) 100%)",
+      boxShadow: "0 0.323px 0.323px 0 rgba(0,0,0,0.25)",
+    }}
+    aria-hidden="true"
+  >
+    <img src="/images/icons/star.svg" alt="" className="h-full w-full" />
+  </span>
+);
+
 export default function InteractiveLanding() {
   const { openChat } = useChat();
 
@@ -386,12 +405,12 @@ export default function InteractiveLanding() {
                       </button>
                     </div>
 
-                    {/* SECTION 2: MEMBERSHIP / WALLET — title+pill on same row on mobile (justify-between), stacked on desktop */}
+                    {/* SECTION 2: MEMBERSHIP / WALLET — title (left) + VIP pill (right) on same row, button below */}
                     <div className="flex flex-col gap-3">
-                      <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
+                      <div className="flex flex-row items-center justify-between gap-3">
                         <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Membership / Wallet</div>
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1.5 pr-2.5 py-1">
-                          <img src="/images/icons/star.svg" alt="" className="h-3.5 w-3.5" />
+                          <BoxedStar size={16} />
                           <span className="font-display font-semibold text-[13px] text-black">VIP</span>
                         </div>
                       </div>
@@ -400,9 +419,9 @@ export default function InteractiveLanding() {
                       </button>
                     </div>
 
-                    {/* SECTION 3: SUPERFAN+ — title+pill on same row on mobile (justify-between), stacked on desktop */}
+                    {/* SECTION 3: SUPERFAN+ — title (left) + ACTIVE pill (right) on same row, button below */}
                     <div className="flex flex-col gap-3">
-                      <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
+                      <div className="flex flex-row items-center justify-between gap-3">
                         <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Superfan+</div>
                         <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1">
                           <img src="/images/icons/active-coin.png" alt="" className="h-4 w-4" />
@@ -593,8 +612,8 @@ export default function InteractiveLanding() {
                     <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
                       <img src={flagUrl("fr")} alt="FR" className="h-full w-full object-cover" />
                     </div>
-                    {/* Mauve star indicator next to You (per Figma) */}
-                    <img src="/images/icons/star.svg" alt="" className="h-4 w-4 shrink-0" />
+                    {/* Boxed star badge next to You (matches Figma — gradient box with star inside) */}
+                    <BoxedStar size={16} />
                   </div>
                   <span className="font-display font-bold text-base text-black shrink-0">{formattedXp}</span>
                 </div>
