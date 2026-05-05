@@ -78,20 +78,20 @@ const YOU_RANK = { Weekly: 12, Monthly: 47, "Full Leaderboard": 132 };
 
 const flagUrl = (code) => `https://flagcdn.com/w80/${code}.png`;
 
-// Activity cards (image swap: listening party ↔ record a cover)
-const ACTIVITY_CARDS = [
+// Default activity cards — held in component state so admin can edit inline
+const DEFAULT_ACTIVITY_CARDS = [
   { kind: "trivia", status: "Open", title: "What's the highest note EJAE can sing?", reward: "100XP" },
   { kind: "event", status: "Open", title: "EJAE listening party + fan Q&A", reward: "500XP", image: "/images/artist/ejae-portrait.jpeg", cta: "Check In Now" },
   { kind: "event", status: "Completed", title: "EJAE Trivia: Play to Earn Points and unlock achievements", reward: "500XP", image: "/images/artist/ejae-time-after-time.jpg", cta: "Play Now" },
-  { kind: "event", status: "Open", title: "Record a cover", reward: "750XP", image: "/images/artist/ejae-press.webp", cta: "Submit Cover" },
+  { kind: "event", status: "Open", title: "Record a cover", reward: "750XP", image: "/images/artist/instagram-live.webp", cta: "Submit Cover" },
 ];
 
-// Rewards data — Signed Set List uses the Limited Edition Merch image
-const REWARDS = [
+// Default rewards — held in component state so admin can edit inline
+const DEFAULT_REWARDS = [
   { title: "Limited Edition Merch", subtitle: "Spring Collection", req: "1000XP", image: "/images/artist/ejae-press.webp" },
   { title: "Discounted Tickets", subtitle: "Next tour presale access", req: "2000XP", image: "/images/artist/ejae-portrait.jpeg" },
   { title: "Signed Set List", subtitle: "Personally autographed by EJAE", req: "4000XP", image: "/images/artist/ejae-press.webp" },
-  { title: "Backstage Meet & Greet", subtitle: "VIP access on tour stops", req: "6000XP", image: "/images/artist/instagram-live.webp" },
+  { title: "Backstage Meet & Greet", subtitle: "VIP access on tour stops", req: "6000XP", image: "/images/artist/ejae-press.webp" },
 ];
 
 // Star icon used in section headings
@@ -144,6 +144,23 @@ export default function InteractiveLanding() {
   const [toastMsg, setToastMsg] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState("Weekly");
+
+  // Editable cards (admin can edit inline by clicking the three-dot menu)
+  const [activityCards, setActivityCards] = useState(DEFAULT_ACTIVITY_CARDS);
+  const [rewards, setRewards] = useState(DEFAULT_REWARDS);
+  // Which card is currently being edited: { section: 'activity'|'reward', index }
+  const [editingCard, setEditingCard] = useState(null);
+  const isEditing = (section, index) =>
+    editingCard?.section === section && editingCard?.index === index;
+  const toggleEdit = (section, index) => {
+    setEditingCard((cur) => (cur?.section === section && cur?.index === index ? null : { section, index }));
+  };
+  const updateActivity = (i, patch) => {
+    setActivityCards((prev) => prev.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
+  };
+  const updateReward = (i, patch) => {
+    setRewards((prev) => prev.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
+  };
 
   const [linkModalApp, setLinkModalApp] = useState(null);
   const [linkedApps, setLinkedApps] = useState({});
@@ -647,10 +664,14 @@ export default function InteractiveLanding() {
               </div>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {ACTIVITY_CARDS.map((card, i) => {
+              {activityCards.map((card, i) => {
                 const isCompleted = card.status === "Completed";
+                const editing = isEditing("activity", i);
                 return (
-                  <div key={i} className="rounded-[32px] bg-white shadow-card overflow-hidden flex flex-col">
+                  <div
+                    key={i}
+                    className={`rounded-[32px] bg-white shadow-card overflow-hidden flex flex-col transition ${editing ? "ring-2 ring-mauve" : ""}`}
+                  >
                     {/* Status pill — both Open and Completed are MAUVE per Figma (no green) */}
                     <div className="px-4 pt-4 pb-3 flex items-center justify-between">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-figmaGray font-display font-semibold text-[13px] text-black">
@@ -665,14 +686,35 @@ export default function InteractiveLanding() {
                         )}
                         {card.status}
                       </span>
-                      <button className="h-8 w-8 rounded-full bg-white border border-figmaGray hover:bg-figmaGray transition grid place-items-center text-black/50">
-                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                      <button
+                        onClick={() => toggleEdit("activity", i)}
+                        title={editing ? "Done editing" : "Edit quest"}
+                        className={`h-8 w-8 rounded-full border border-figmaGray transition grid place-items-center ${
+                          editing ? "bg-mauve text-white border-mauve" : "bg-white hover:bg-figmaGray text-black/50"
+                        }`}
+                      >
+                        {editing ? (
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        ) : (
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                        )}
                       </button>
                     </div>
                     <div className="px-4 pb-4 flex-1 flex flex-col">
                       {card.kind === "trivia" ? (
                         <>
-                          <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug">{card.title}</p>
+                          {editing ? (
+                            <input
+                              type="text"
+                              value={card.title}
+                              onChange={(e) => updateActivity(i, { title: e.target.value })}
+                              className="font-display font-bold text-[17px] text-black mb-3 leading-snug w-full bg-figmaGray rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-mauve"
+                            />
+                          ) : (
+                            <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug">{card.title}</p>
+                          )}
                           <div className="space-y-2">
                             {TRIVIA_OPTIONS.map((opt, j) => {
                               let cls = "bg-figmaGray text-black hover:bg-mauve/10";
@@ -713,13 +755,31 @@ export default function InteractiveLanding() {
                             </div>
                           </div>
                           {/* Title takes remaining space so the button is pinned to the bottom of every card */}
-                          <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug text-center flex-1">{card.title}</p>
-                          <button
-                            onClick={() => fireToast(`${card.cta} - check back soon!`)}
-                            className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white hover:bg-mauve-600 mt-auto"
-                          >
-                            {card.cta}
-                          </button>
+                          {editing ? (
+                            <input
+                              type="text"
+                              value={card.title}
+                              onChange={(e) => updateActivity(i, { title: e.target.value })}
+                              className="font-display font-bold text-[17px] text-black mb-3 leading-snug text-center flex-1 w-full bg-figmaGray rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-mauve"
+                            />
+                          ) : (
+                            <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug text-center flex-1">{card.title}</p>
+                          )}
+                          {editing ? (
+                            <input
+                              type="text"
+                              value={card.cta}
+                              onChange={(e) => updateActivity(i, { cta: e.target.value })}
+                              className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white text-center mt-auto outline-none focus:ring-2 focus:ring-white/60"
+                            />
+                          ) : (
+                            <button
+                              onClick={() => fireToast(`${card.cta} - check back soon!`)}
+                              className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white hover:bg-mauve-600 mt-auto"
+                            >
+                              {card.cta}
+                            </button>
+                          )}
                         </>
                       )}
                     </div>
@@ -729,7 +789,16 @@ export default function InteractiveLanding() {
                         <div className="font-display font-semibold text-[13px] text-black mb-1">Rewards</div>
                         <span className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1 border border-figmaGray">
                           <GoldCoin size={16} />
-                          <span className="font-display font-semibold text-[13px] text-black">{card.reward}</span>
+                          {editing ? (
+                            <input
+                              type="text"
+                              value={card.reward}
+                              onChange={(e) => updateActivity(i, { reward: e.target.value })}
+                              className="font-display font-semibold text-[13px] text-black bg-transparent w-16 outline-none"
+                            />
+                          ) : (
+                            <span className="font-display font-semibold text-[13px] text-black">{card.reward}</span>
+                          )}
                         </span>
                       </div>
                       <div className="text-right">
@@ -774,10 +843,14 @@ export default function InteractiveLanding() {
           </div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {REWARDS.map((card, i) => {
+          {rewards.map((card, i) => {
             const isFeatured = i === 0;
+            const editing = isEditing("reward", i);
             return (
-              <div key={i} className="rounded-[32px] bg-mauve shadow-card overflow-hidden flex flex-col text-white">
+              <div
+                key={i}
+                className={`rounded-[32px] bg-mauve shadow-card overflow-hidden flex flex-col text-white transition ${editing ? "ring-2 ring-white" : ""}`}
+              >
                 {/* Header: Open pill (white) + three-dot button (white) */}
                 <div className="px-4 pt-4 pb-3 flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white font-display font-semibold text-[13px] text-black">
@@ -785,14 +858,24 @@ export default function InteractiveLanding() {
                     Open
                   </span>
                   <button
-                    aria-label="More options"
-                    className="h-8 w-8 rounded-full bg-white hover:bg-white/90 transition grid place-items-center text-black/60"
+                    onClick={() => toggleEdit("reward", i)}
+                    aria-label={editing ? "Done editing" : "Edit reward"}
+                    title={editing ? "Done editing" : "Edit reward"}
+                    className={`h-8 w-8 rounded-full transition grid place-items-center ${
+                      editing ? "bg-white text-mauve" : "bg-white hover:bg-white/90 text-black/60"
+                    }`}
                   >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                      <circle cx="5" cy="12" r="2" />
-                      <circle cx="12" cy="12" r="2" />
-                      <circle cx="19" cy="12" r="2" />
-                    </svg>
+                    {editing ? (
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="5" cy="12" r="2" />
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="19" cy="12" r="2" />
+                      </svg>
+                    )}
                   </button>
                 </div>
 
@@ -818,10 +901,29 @@ export default function InteractiveLanding() {
                     </div>
                   )}
 
-                  {/* Title + subtitle, centered, white */}
+                  {/* Title + subtitle, centered, white — editable in admin mode */}
                   <div className="text-center mb-3">
-                    <h3 className="font-display font-bold text-[17px] text-white leading-snug">{card.title}</h3>
-                    {card.subtitle && <p className="font-display font-medium text-sm text-white/70 mt-1">{card.subtitle}</p>}
+                    {editing ? (
+                      <input
+                        type="text"
+                        value={card.title}
+                        onChange={(e) => updateReward(i, { title: e.target.value })}
+                        className="font-display font-bold text-[17px] text-white leading-snug w-full text-center bg-white/10 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-white/50"
+                      />
+                    ) : (
+                      <h3 className="font-display font-bold text-[17px] text-white leading-snug">{card.title}</h3>
+                    )}
+                    {editing ? (
+                      <input
+                        type="text"
+                        value={card.subtitle || ""}
+                        placeholder="Subtitle"
+                        onChange={(e) => updateReward(i, { subtitle: e.target.value })}
+                        className="font-display font-medium text-sm text-white/90 mt-1 w-full text-center bg-white/10 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-white/50"
+                      />
+                    ) : (
+                      card.subtitle && <p className="font-display font-medium text-sm text-white/70 mt-1">{card.subtitle}</p>
+                    )}
                   </div>
 
                   {/* Claim Now button — inverted (white bg, mauve text) for contrast on dark card */}
@@ -839,7 +941,16 @@ export default function InteractiveLanding() {
                     <div className="font-display font-semibold text-[13px] text-white mb-1">Requirements</div>
                     <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full pl-1 pr-2.5 py-1">
                       <GoldCoin size={16} />
-                      <span className="font-display font-semibold text-[13px] text-white">{card.req}</span>
+                      {editing ? (
+                        <input
+                          type="text"
+                          value={card.req}
+                          onChange={(e) => updateReward(i, { req: e.target.value })}
+                          className="font-display font-semibold text-[13px] text-white bg-transparent w-20 outline-none"
+                        />
+                      ) : (
+                        <span className="font-display font-semibold text-[13px] text-white">{card.req}</span>
+                      )}
                     </span>
                   </div>
                 </div>
