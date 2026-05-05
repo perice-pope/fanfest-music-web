@@ -669,7 +669,7 @@ export default function InteractiveLanding() {
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
                       </button>
                     </div>
-                    <div className="px-4 pb-4 flex-1">
+                    <div className="px-4 pb-4 flex-1 flex flex-col">
                       {card.kind === "trivia" ? (
                         <>
                           <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug">{card.title}</p>
@@ -712,10 +712,11 @@ export default function InteractiveLanding() {
                               </div>
                             </div>
                           </div>
-                          <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug text-center">{card.title}</p>
+                          {/* Title takes remaining space so the button is pinned to the bottom of every card */}
+                          <p className="font-display font-bold text-[17px] text-black mb-3 leading-snug text-center flex-1">{card.title}</p>
                           <button
                             onClick={() => fireToast(`${card.cta} - check back soon!`)}
-                            className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white hover:bg-mauve-600"
+                            className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white hover:bg-mauve-600 mt-auto"
                           >
                             {card.cta}
                           </button>
