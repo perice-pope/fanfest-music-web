@@ -62,7 +62,7 @@ export default function SignupPage() {
             <span className="font-display text-xl font-bold">FanFest</span>
           </Link>
 
-          <h1 className="font-display text-3xl font-bold">Join the fest</h1>
+          <h1 className="font-display text-3xl font-bold">Join FanFest</h1>
           <p className="text-muted mt-2">Create an account and start connecting.</p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">

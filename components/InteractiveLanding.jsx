@@ -35,6 +35,15 @@ const ACTIVITY_MEMBERS = [
   { name: "Michel", points: 300, flag: "ua", desc: "top contributor in chat", time: "30 min", avatar: "michel" },
   { name: "Oliver", points: 200, flag: "ua", desc: "sending a message", time: "12 min", avatar: "pierre-fan" },
   { name: "Farhad", points: 200, flag: "es", desc: "playing the game", time: "12 min", avatar: "jacques" },
+  { name: "Sofia", points: 650, flag: "es", desc: "voting in poll", time: "5 min", avatar: "sofia" },
+  { name: "Devon", points: 450, flag: "fr", desc: "inviting a friend", time: "8 min", avatar: "devon", boosted: true },
+  { name: "Talia", points: 350, flag: "br", desc: "completing a quest", time: "20 min", avatar: "talia" },
+  { name: "Marcus", points: 1100, flag: "ua", desc: "streaming new EP", time: "1 hr", avatar: "marcus" },
+  { name: "Aaliyah", points: 250, flag: "ye", desc: "joining live Q&A", time: "10 min", avatar: "aaliyah" },
+  { name: "Diego", points: 700, flag: "br", desc: "posting fan art", time: "25 min", avatar: "diego" },
+  { name: "Anya", points: 550, flag: "ua", desc: "sharing on TikTok", time: "18 min", avatar: "anya" },
+  { name: "Lucas", points: 400, flag: "es", desc: "writing a review", time: "35 min", avatar: "lucas" },
+  { name: "Karim", points: 850, flag: "ye", desc: "predicting setlist", time: "40 min", avatar: "karim" },
 ];
 
 // Avatars we have locally (pulled from Figma). Anything not in this set falls back to pravatar.cc
@@ -392,7 +401,7 @@ export default function InteractiveLanding() {
                       href="/signup"
                       className="hidden md:inline-flex bg-white text-mauve hover:bg-mauve hover:text-white transition rounded-full px-6 py-3 font-display font-bold uppercase text-sm tracking-wide shadow-card"
                     >
-                      Join Fan Club
+                      Join FanFest
                     </Link>
                   </div>
 
@@ -478,7 +487,7 @@ export default function InteractiveLanding() {
               >
                 {/* pt-3 inside the scroll container gives the coin badges (top: -4px) clearance,
                     since `overflow-x: auto` forces the browser to clip overflow-y too. */}
-                <div className="flex gap-4 overflow-x-auto no-scrollbar lg:justify-between pt-3">
+                <div className="flex gap-5 overflow-x-auto no-scrollbar pt-3">
                   {ACTIVITY_MEMBERS.map((m, i) => (
                     <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 w-[135px]">
                       <div className="relative w-[135px] h-[70px] flex items-center justify-center">
