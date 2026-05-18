@@ -1101,20 +1101,18 @@ export default function InteractiveLanding() {
               FREE vs. SUPERFAN+
             </h2>
 
-            {/* FREE section */}
+            {/* FREE section — each sentence on its own line */}
             <div className="mt-6 bg-white rounded-2xl p-5">
               <h3 className="font-display font-bold text-lg text-mauve">FREE</h3>
-              <p className="font-display font-medium text-sm text-mauve/80 mt-1.5 leading-snug">
-                Enjoy access to quests and rewards. View-only access for chat.
-              </p>
+              <p className="font-display font-medium text-sm text-mauve/80 mt-1.5 leading-snug">Enjoy access to quests and rewards.</p>
+              <p className="font-display font-medium text-sm text-mauve/80 leading-snug">View only access for chat.</p>
             </div>
 
-            {/* SUPERFAN+ section */}
+            {/* SUPERFAN+ section — each sentence on its own line */}
             <div className="mt-3 bg-white rounded-2xl p-5">
               <h3 className="font-display font-bold text-lg text-mauve">SUPERFAN+</h3>
-              <p className="font-display font-medium text-sm text-mauve/80 mt-1.5 leading-snug">
-                Earn points faster. Ability to access and create chat rooms.
-              </p>
+              <p className="font-display font-medium text-sm text-mauve/80 mt-1.5 leading-snug">Earn points faster.</p>
+              <p className="font-display font-medium text-sm text-mauve/80 leading-snug">Ability to access and create chat rooms.</p>
             </div>
           </div>
         </div>
