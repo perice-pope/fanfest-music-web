@@ -1135,7 +1135,7 @@ export default function InteractiveLanding() {
                 onClick={() => { setWalletOpen(false); setBenefitsOpen(true); }}
                 className="w-full py-3 rounded-full bg-white text-mauve font-display font-bold text-sm hover:bg-white/90 transition"
               >
-                Upgrade to Superfan+
+                Change to Free
               </button>
             </div>
           </div>
