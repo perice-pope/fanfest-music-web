@@ -1112,16 +1112,9 @@ export default function InteractiveLanding() {
             {/* SUPERFAN+ section */}
             <div className="mt-3 bg-white rounded-2xl p-5">
               <h3 className="font-display font-bold text-lg text-mauve">SUPERFAN+</h3>
-              <ul className="mt-2 space-y-1.5">
-                <li className="flex items-start gap-2 font-display font-medium text-sm text-mauve/90">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-mauve shrink-0" />
-                  Earn points faster
-                </li>
-                <li className="flex items-start gap-2 font-display font-medium text-sm text-mauve/90">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-mauve shrink-0" />
-                  Ability to access and create chat rooms
-                </li>
-              </ul>
+              <p className="font-display font-medium text-sm text-mauve/80 mt-1.5 leading-snug">
+                Earn points faster. Ability to access and create chat rooms.
+              </p>
             </div>
           </div>
         </div>
