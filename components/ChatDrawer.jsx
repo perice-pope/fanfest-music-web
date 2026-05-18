@@ -5,7 +5,7 @@ import { useChat } from "@/components/ChatProvider";
 
 /* ─── Room data ─── */
 const ROOMS = [
-  { id: 1, name: "EJAE Official Fan Club", members: 20000, online: 1067, color: "bg-mauve", host: "Amanda", newMessages: 1067 },
+  { id: 1, name: "EJAE Official Chat", members: 20000, online: 1067, color: "bg-mauve", host: "Amanda", newMessages: 1067 },
   { id: 2, name: "Stan Club", members: 4500, online: 312, color: "bg-mauve-400", host: "Jenny", newMessages: 87 },
   { id: 3, name: "New Music Discussion", members: 3400, online: 154, color: "bg-mauve-300", host: "Marco", newMessages: 42 },
   { id: 4, name: "Concert Meetups", members: 2800, online: 88, color: "bg-mauve-500", host: "Lauren", newMessages: 19 },

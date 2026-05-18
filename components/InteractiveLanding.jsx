@@ -160,6 +160,8 @@ export default function InteractiveLanding() {
 
   // Benefits modal (FREE vs SUPERFAN+)
   const [benefitsOpen, setBenefitsOpen] = useState(false);
+  // Membership / Add to Wallet modal
+  const [walletOpen, setWalletOpen] = useState(false);
   // Which card is currently being edited: { section: 'activity'|'reward', index }
   const [editingCard, setEditingCard] = useState(null);
   const isEditing = (section, index) =>
@@ -450,8 +452,11 @@ export default function InteractiveLanding() {
                           <span className="font-display font-semibold text-[13px] text-black">VIP</span>
                         </div>
                       </div>
-                      <button className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black">
-                        Upgrade / Top up
+                      <button
+                        onClick={() => setWalletOpen(true)}
+                        className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black"
+                      >
+                        Membership/Add to Wallet
                       </button>
                     </div>
 
@@ -1064,6 +1069,78 @@ export default function InteractiveLanding() {
         onClose={handleCloseLinkModal}
         onLink={handleLinkApp}
       />
+
+      {/* ─── Membership / Add to Wallet modal ─── */}
+      {walletOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={() => setWalletOpen(false)}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="relative bg-figmaGray rounded-[32px] shadow-card-lg max-w-md w-full p-7 sm:p-8 animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="wallet-title"
+          >
+            <button
+              onClick={() => setWalletOpen(false)}
+              aria-label="Close"
+              className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white text-mauve hover:bg-mauve hover:text-white transition grid place-items-center shadow-sm"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h2
+              id="wallet-title"
+              className="font-display font-bold text-2xl text-mauve uppercase tracking-tight text-center"
+            >
+              Membership / Add to Wallet
+            </h2>
+
+            {/* Current plan card */}
+            <div className="mt-6 bg-white rounded-2xl p-5">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display font-bold text-lg text-mauve">Current Plan</h3>
+                <span className="inline-flex items-center gap-1.5 bg-figmaGray rounded-full pl-1.5 pr-2.5 py-1">
+                  <BoxedStar size={14} />
+                  <span className="font-display font-semibold text-[13px] text-mauve">VIP</span>
+                </span>
+              </div>
+              <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">Active member since March 2026.</p>
+            </div>
+
+            {/* Wallet balance card */}
+            <div className="mt-3 bg-white rounded-2xl p-5">
+              <h3 className="font-display font-bold text-lg text-mauve">Wallet Balance</h3>
+              <div className="mt-2 flex items-center gap-2">
+                <GoldCoin size={20} />
+                <span className="font-display font-bold text-2xl text-mauve">{formattedXp}<span className="text-base font-semibold">XP</span></span>
+              </div>
+              <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">Top up your wallet to unlock rewards faster.</p>
+            </div>
+
+            {/* CTAs */}
+            <div className="mt-5 flex flex-col gap-2.5">
+              <button
+                onClick={() => { setWalletOpen(false); fireToast("Top-up flow coming soon!"); }}
+                className="w-full py-3 rounded-full bg-mauve text-white font-display font-bold text-sm hover:bg-mauve-600 transition"
+              >
+                Top up XP
+              </button>
+              <button
+                onClick={() => { setWalletOpen(false); setBenefitsOpen(true); }}
+                className="w-full py-3 rounded-full bg-white text-mauve font-display font-bold text-sm hover:bg-white/90 transition"
+              >
+                Upgrade to Superfan+
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── See Benefits modal (FREE vs SUPERFAN+) ─── */}
       {benefitsOpen && (
