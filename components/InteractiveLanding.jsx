@@ -1107,7 +1107,7 @@ export default function InteractiveLanding() {
                 <h3 className="font-display font-bold text-lg text-mauve">Current Plan</h3>
                 <span className="inline-flex items-center gap-1.5 bg-figmaGray rounded-full pl-1.5 pr-2.5 py-1">
                   <BoxedStar size={14} />
-                  <span className="font-display font-semibold text-[13px] text-mauve">VIP</span>
+                  <span className="font-display font-semibold text-[13px] text-mauve">SUPERFAN+</span>
                 </span>
               </div>
               <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">Active member since March 2026.</p>
