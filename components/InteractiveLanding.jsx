@@ -157,6 +157,9 @@ export default function InteractiveLanding() {
   // Editable cards (admin can edit inline by clicking the three-dot menu)
   const [activityCards, setActivityCards] = useState(DEFAULT_ACTIVITY_CARDS);
   const [rewards, setRewards] = useState(DEFAULT_REWARDS);
+
+  // Benefits modal (FREE vs SUPERFAN+)
+  const [benefitsOpen, setBenefitsOpen] = useState(false);
   // Which card is currently being edited: { section: 'activity'|'reward', index }
   const [editingCard, setEditingCard] = useState(null);
   const isEditing = (section, index) =>
@@ -461,7 +464,10 @@ export default function InteractiveLanding() {
                           <span className="font-display font-semibold text-[13px] text-black">ACTIVE</span>
                         </div>
                       </div>
-                      <button className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black">
+                      <button
+                        onClick={() => setBenefitsOpen(true)}
+                        className="bg-white hover:bg-white/90 transition rounded-full px-5 h-[50px] flex items-center justify-center font-display font-medium text-[15px] text-black"
+                      >
                         See Benefits
                       </button>
                     </div>
@@ -1058,6 +1064,69 @@ export default function InteractiveLanding() {
         onClose={handleCloseLinkModal}
         onLink={handleLinkApp}
       />
+
+      {/* ─── See Benefits modal (FREE vs SUPERFAN+) ─── */}
+      {benefitsOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={() => setBenefitsOpen(false)}
+        >
+          {/* Backdrop with blur (matches chat drawer style) */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+
+          {/* Centered modal — gray rounded box with mauve text */}
+          <div
+            className="relative bg-figmaGray rounded-[32px] shadow-card-lg max-w-md w-full p-7 sm:p-8 animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="benefits-title"
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setBenefitsOpen(false)}
+              aria-label="Close"
+              className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white text-mauve hover:bg-mauve hover:text-white transition grid place-items-center shadow-sm"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Header */}
+            <h2
+              id="benefits-title"
+              className="font-display font-bold text-2xl text-mauve uppercase tracking-tight text-center"
+            >
+              FREE vs. SUPERFAN+
+            </h2>
+
+            {/* FREE section */}
+            <div className="mt-6 bg-white rounded-2xl p-5">
+              <h3 className="font-display font-bold text-lg text-mauve">FREE</h3>
+              <p className="font-display font-medium text-sm text-mauve/80 mt-1.5 leading-snug">
+                Enjoy access to quests and rewards. View-only access for chat.
+              </p>
+            </div>
+
+            {/* SUPERFAN+ section */}
+            <div className="mt-3 bg-white rounded-2xl p-5">
+              <h3 className="font-display font-bold text-lg text-mauve">SUPERFAN+</h3>
+              <ul className="mt-2 space-y-1.5">
+                <li className="flex items-start gap-2 font-display font-medium text-sm text-mauve/90">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-mauve shrink-0" />
+                  Earn points faster
+                </li>
+                <li className="flex items-start gap-2 font-display font-medium text-sm text-mauve/90">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-mauve shrink-0" />
+                  Ability to access and create chat rooms
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Toast message={toastMsg} show={showToast} onClose={closeToast} />
     </>
   );
