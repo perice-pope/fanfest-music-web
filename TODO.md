@@ -31,10 +31,30 @@
 - [x] TikTok + Instagram social links (tiktok.com/@ejaemusic, instagram.com/ejaemusic)
 - [x] ChatProvider context for global chat access
 
+## Shipped (v4 — accounts, tracking, check-in email, live band)
+See `SPEC-v4.md` for the full spec.
+- [x] `supabase/schema.sql` rewritten as one idempotent file and **applied** to the live project
+- [x] `points_events` XP ledger with `(user_id, dedupe_key)` unique index — every award is idempotent
+- [x] `event_checkins` table + `xp_totals` view
+- [x] `/api/auth/signup` — service-role `createUser({ email_confirm: true })`, so signup is one click with no confirmation email
+- [x] Seeded accounts via `scripts/seed-users.mjs` (Perice 1500XP, Amanda 1200XP)
+- [x] Landing page is identity-aware — real display name and real XP when signed in
+- [x] `/api/points/award` — server-side award table; the client can't set its own point values
+- [x] `/api/spotify/scan` — recently-played → points, deduped on `played_at` (+5/play, +25 for an EJAE track)
+- [x] Spotify card does real OAuth instead of asking for a handle; shows live track list
+- [x] `/api/checkin` — listening party check-in, +500XP, sends "You're all checked in" via Resend
+- [x] Email degrades gracefully: no `RESEND_API_KEY` → check-in and XP still succeed
+- [x] Activity band is a CSS marquee — always drifting, pauses on hover, respects `prefers-reduced-motion`
+- [x] +10XP presence award every 60s while the tab is visible, deduped per UTC minute
+- [x] Fixed the `fansfest-web` → `fanfest-web` typo in the Vercel `NEXT_PUBLIC_SITE_URL` / `SPOTIFY_REDIRECT_URI`
+
 ## Next (post-launch)
-- [ ] Deploy to Vercel + custom domain
-- [ ] Run `supabase/schema.sql` and `supabase/storage.sql` in Supabase SQL Editor
-- [ ] Spotify redirect URI: update to production URL after deploy
+- [ ] Add `RESEND_API_KEY` to `.env.local` + Vercel to switch the check-in email on
+- [ ] Verify a domain in Resend so check-in email reaches fans other than the account owner
+- [ ] Add `https://fanfest-web.vercel.app/api/spotify/callback` to the Spotify app's redirect URIs
+- [ ] Custom domain
+- [ ] Run `supabase/storage.sql` in Supabase SQL Editor (avatars bucket)
+- [ ] Real leaderboard reading from `xp_totals` (currently still the Figma sample data)
 - [ ] Instagram Graph API connection (pending app review)
 - [ ] TikTok Login Kit (pending app review)
 - [ ] Email magic-link fallback

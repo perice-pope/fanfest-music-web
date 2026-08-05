@@ -28,7 +28,8 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return setErr(error.message);
-    router.push(params.get("next") || "/dashboard");
+    // Fans land back on the fan page; /dashboard is the admin console.
+    router.push(params.get("next") || "/");
     router.refresh();
   }
 
