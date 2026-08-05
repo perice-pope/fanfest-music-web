@@ -362,9 +362,13 @@ export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
         fireToast(`You're all checked in! Confirmation sent to ${data.email}.`);
       } else if (data.alreadyCheckedIn) {
         fireToast("You're already checked in — see you at the party!");
+      } else if (data.emailError === "not_configured") {
+        // Check-in and XP still landed; email just isn't switched on.
+        fireToast("You're all checked in! (Confirmation email isn't switched on yet.)");
       } else {
-        // Check-in and XP still landed; only the email didn't go out.
-        fireToast("You're all checked in! (Email delivery isn't configured yet.)");
+        // Resend rejected the recipient — most often the sandbox restriction
+        // that applies until a domain is verified. The check-in itself is fine.
+        fireToast("You're all checked in! (We couldn't email your confirmation.)");
       }
     } catch {
       fireToast("Check-in failed. Try again.");
