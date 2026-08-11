@@ -3,9 +3,11 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import Toast from "@/components/Toast";
 import LinkAppModal from "@/components/LinkAppModal";
 import { useChat } from "@/components/ChatProvider";
+import { useFanEngine } from "@/components/useFanEngine";
 
 const STORAGE_KEY = "fansfest_linked_apps";
 
@@ -90,7 +92,9 @@ const flagUrl = (code) => `https://flagcdn.com/w80/${code}.png`;
 // Default activity cards — held in component state so admin can edit inline
 const DEFAULT_ACTIVITY_CARDS = [
   { kind: "trivia", status: "Open", title: "What's the highest note EJAE can sing?", reward: "100XP" },
-  { kind: "event", status: "Open", title: "EJAE listening party + fan Q&A", reward: "500XP", image: "/images/artist/ejae-portrait.jpeg", cta: "Check In Now" },
+  // `action: "checkin"` wires this card's CTA to /api/checkin, which records
+  // the check-in, awards the XP, and sends the "You're all checked in" email.
+  { kind: "event", status: "Open", title: "EJAE listening party + fan Q&A", reward: "500XP", image: "/images/artist/ejae-portrait.jpeg", cta: "Check In Now", action: "checkin" },
   { kind: "event", status: "Completed", title: "EJAE Trivia: Play to Earn Points and unlock achievements", reward: "500XP", image: "/images/artist/ejae-time-after-time.jpg", cta: "Play Now" },
   { kind: "event", status: "Open", title: "Record a cover", reward: "750XP", image: "/images/artist/instagram-live.webp", cta: "Submit Cover" },
 ];
@@ -142,17 +146,56 @@ const BoxedStar = ({ size = 16 }) => (
   </span>
 );
 
-export default function InteractiveLanding() {
+export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
   const { openChat } = useChat();
+  const signedIn = Boolean(fan);
 
   const [activeTab, setActiveTab] = useState(0);
   const [howItWorksSlide, setHowItWorksSlide] = useState(0);
   const [triviaAnswer, setTriviaAnswer] = useState(null);
-  const [xp, setXp] = useState(1500);
-  const [animatingXp, setAnimatingXp] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState("Weekly");
+
+  const fireToast = useCallback((msg) => {
+    setShowToast(false);
+    setTimeout(() => {
+      setToastMsg(msg);
+      setShowToast(true);
+    }, 50);
+  }, []);
+
+  // Live XP, the once-a-minute presence award, and Spotify scanning.
+  // Signed out this is inert and `xp` just holds the demo value.
+  const { xp, pulsing, spotify, award, setXp } = useFanEngine({
+    signedIn,
+    initialXp: signedIn ? fan.xp : demoXp,
+    onAward: fireToast,
+  });
+
+  // Listening-party check-in
+  const [checkedIn, setCheckedIn] = useState(
+    () => fan?.checkedInEvents?.includes("listening-party") || false
+  );
+  const [checkingIn, setCheckingIn] = useState(false);
+
+  // ─── Activity band liveliness ───
+  // The band's XP badges tick up on their own every few seconds so the section
+  // reads as a live feed rather than a screenshot. Randomness is confined to
+  // the interval (never the initial state) so SSR and hydration agree.
+  const [memberPoints, setMemberPoints] = useState(() => ACTIVITY_MEMBERS.map((m) => m.points));
+  const [flashIndex, setFlashIndex] = useState(-1);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const i = Math.floor(Math.random() * ACTIVITY_MEMBERS.length);
+      const bump = (Math.floor(Math.random() * 4) + 1) * 25;
+      setMemberPoints((prev) => prev.map((p, idx) => (idx === i ? p + bump : p)));
+      setFlashIndex(i);
+      setTimeout(() => setFlashIndex(-1), 1200);
+    }, 8000);
+    return () => clearInterval(id);
+  }, []);
 
   // Editable cards (admin can edit inline by clicking the three-dot menu)
   const [activityCards, setActivityCards] = useState(DEFAULT_ACTIVITY_CARDS);
@@ -188,19 +231,32 @@ export default function InteractiveLanding() {
     } catch {}
   }, []);
 
+  // Surface the outcome of the Spotify OAuth round trip, which lands back here
+  // as ?spotify=connected or ?spotify_error=…
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const connected = searchParams.get("spotify");
+    const error = searchParams.get("spotify_error");
+
+    if (connected === "connected") {
+      fireToast("Spotify connected! Your plays now earn XP.");
+    } else if (error) {
+      fireToast(
+        error === "not_configured"
+          ? "Spotify isn't configured on the server yet."
+          : `Spotify connection failed: ${error}`
+      );
+    }
+    if (connected || error) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [searchParams, fireToast]);
+
   const saveLinkedApps = useCallback((next) => {
     setLinkedApps(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch {}
-  }, []);
-
-  const fireToast = useCallback((msg) => {
-    setShowToast(false);
-    setTimeout(() => {
-      setToastMsg(msg);
-      setShowToast(true);
-    }, 50);
   }, []);
 
   const closeToast = useCallback(() => setShowToast(false), []);
@@ -216,17 +272,22 @@ export default function InteractiveLanding() {
     setHowItWorksSlide((prev) => (prev + 1) % HOW_IT_WORKS_SLIDES.length);
   };
 
-  const handleTriviaAnswer = (option) => {
+  const handleTriviaAnswer = async (option) => {
     if (triviaAnswer) return;
     setTriviaAnswer(option);
-    if (option === CORRECT_ANSWER) {
-      setAnimatingXp(true);
-      setXp((prev) => prev + 100);
-      fireToast("+100XP! Correct answer!");
-      setTimeout(() => setAnimatingXp(false), 600);
-    } else {
+
+    if (option !== CORRECT_ANSWER) {
       fireToast("Wrong answer! The correct answer is D6.");
+      return;
     }
+
+    if (!signedIn) {
+      fireToast("Correct! Sign in to bank your +100XP.");
+      return;
+    }
+
+    const result = await award("trivia", { questionId: "highest-note" });
+    fireToast(result.awarded ? "+100XP! Correct answer!" : "Correct — you already earned this one.");
   };
 
   const handleClaim = (requiredXp) => {
@@ -241,12 +302,23 @@ export default function InteractiveLanding() {
 
   const handleOpenLinkModal = (app) => setLinkModalApp(app);
   const handleCloseLinkModal = () => setLinkModalApp(null);
-  const handleLinkApp = (key, handle) => {
+
+  const handleLinkApp = async (key, handle) => {
     const next = { ...linkedApps, [key]: handle };
     saveLinkedApps(next);
     setLinkModalApp(null);
-    fireToast(`${key.charAt(0).toUpperCase() + key.slice(1)} linked as @${handle}`);
+
+    const platform = key.charAt(0).toUpperCase() + key.slice(1);
+    if (!signedIn) return fireToast(`${platform} linked as @${handle}`);
+
+    const result = await award("link_social", { platform: key, handle });
+    fireToast(
+      result.awarded
+        ? `${platform} linked as @${handle} — +150XP!`
+        : `${platform} linked as @${handle}`
+    );
   };
+
   const handleUnlinkApp = (key) => {
     const next = { ...linkedApps };
     delete next[key];
@@ -254,14 +326,66 @@ export default function InteractiveLanding() {
     fireToast(`Unlinked ${key}`);
   };
 
-  const handleInvite = () => {
+  const handleInvite = async () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText("https://fanfest.com/invite/ejae?ref=you").catch(() => {});
     }
-    fireToast("Invite link copied!");
+    if (!signedIn) return fireToast("Invite link copied!");
+
+    const result = await award("invite");
+    fireToast(result.awarded ? "Invite link copied — +200XP!" : "Invite link copied!");
+  };
+
+  // ─── Listening party check-in (fires the "You're all checked in" email) ───
+  const handleCheckIn = async () => {
+    if (!signedIn) return fireToast("Sign in to check in to the listening party.");
+    if (checkingIn) return;
+
+    setCheckingIn(true);
+    try {
+      const res = await fetch("/api/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventSlug: "listening-party" }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        fireToast(data.error || "Check-in failed. Try again.");
+        return;
+      }
+
+      setCheckedIn(true);
+      if (data.xp != null) setXp(data.xp);
+
+      if (data.emailed) {
+        fireToast(`You're all checked in! Confirmation sent to ${data.email}.`);
+      } else if (data.alreadyCheckedIn) {
+        fireToast("You're already checked in — see you at the party!");
+      } else if (data.emailError === "not_configured") {
+        // Check-in and XP still landed; email just isn't switched on.
+        fireToast("You're all checked in! (Confirmation email isn't switched on yet.)");
+      } else {
+        // Resend rejected the recipient — most often the sandbox restriction
+        // that applies until a domain is verified. The check-in itself is fine.
+        fireToast("You're all checked in! (We couldn't email your confirmation.)");
+      }
+    } catch {
+      fireToast("Check-in failed. Try again.");
+    } finally {
+      setCheckingIn(false);
+    }
+  };
+
+  // Card CTAs route by intent: the listening party checks in, everything else
+  // is still a placeholder.
+  const handleActivityCta = (card) => {
+    if (card.action === "checkin") return handleCheckIn();
+    fireToast(`${card.cta} - check back soon!`);
   };
 
   const formattedXp = xp.toLocaleString();
+  const displayName = signedIn ? fan.displayName : "Pierre";
   const currentSlide = HOW_IT_WORKS_SLIDES[howItWorksSlide];
 
   return (
@@ -386,7 +510,7 @@ export default function InteractiveLanding() {
                         </div>
                       </div>
                       <div className="flex flex-col justify-center">
-                        <span className="font-display font-medium text-sm text-black md:text-white leading-tight uppercase tracking-wide md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">Pierre</span>
+                        <span className="font-display font-medium text-sm text-black md:text-white leading-tight uppercase tracking-wide md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">{displayName}</span>
                         {/* "View Profile" only on desktop per Figma mobile mockup */}
                         <span className="hidden md:inline font-display font-medium text-[13px] text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">View Profile</span>
                       </div>
@@ -396,18 +520,27 @@ export default function InteractiveLanding() {
                     <div className="flex md:hidden items-center gap-2">
                       <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
                         <GoldCoin size={16} />
-                        <span className={`font-display font-semibold text-[13px] text-black transition-all ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
+                        <span className={`font-display font-semibold text-[13px] text-black inline-block ${pulsing ? "xp-pulse" : ""}`}>{formattedXp}XP</span>
                       </div>
                       <span className="inline-flex items-center bg-white rounded-full px-3 py-1 font-display font-semibold text-[13px] text-black">75%</span>
                     </div>
 
-                    {/* Desktop-only: Join Fan Club CTA on the right */}
-                    <Link
-                      href="/signup"
-                      className="hidden md:inline-flex bg-white text-mauve hover:bg-mauve hover:text-white transition rounded-full px-6 py-3 font-display font-bold uppercase text-sm tracking-wide shadow-card"
-                    >
-                      Join FanFest
-                    </Link>
+                    {/* Desktop-only: Join CTA when signed out, live XP when signed in */}
+                    {signedIn ? (
+                      <div className="hidden md:inline-flex items-center gap-2 bg-white rounded-full pl-2 pr-4 py-2.5 shadow-card">
+                        <GoldCoin size={20} />
+                        <span className={`font-display font-bold text-base text-mauve inline-block ${pulsing ? "xp-pulse" : ""}`}>
+                          {formattedXp}XP
+                        </span>
+                      </div>
+                    ) : (
+                      <Link
+                        href="/signup"
+                        className="hidden md:inline-flex bg-white text-mauve hover:bg-mauve hover:text-white transition rounded-full px-6 py-3 font-display font-bold uppercase text-sm tracking-wide shadow-card"
+                      >
+                        Join FanFest
+                      </Link>
+                    )}
                   </div>
 
                   {/* Stats sections — desktop is 3 columns, mobile is stacked vertical sections.
@@ -420,7 +553,7 @@ export default function InteractiveLanding() {
                         <div className="flex items-center gap-3">
                           <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
                             <GoldCoin size={16} />
-                            <span className={`font-display font-semibold text-[13px] text-black transition-all ${animatingXp ? "scale-110" : ""}`}>{formattedXp}XP</span>
+                            <span className={`font-display font-semibold text-[13px] text-black inline-block ${pulsing ? "xp-pulse" : ""}`}>{formattedXp}XP</span>
                           </div>
                           <div className="flex items-center bg-white rounded-full p-[2px] h-8 w-[244px] max-w-full">
                             <div className="flex items-center justify-start bg-mauve rounded-full pl-[2px] pr-3 py-[2px] h-full" style={{ width: "calc(100% * 0.85)" }}>
@@ -496,57 +629,70 @@ export default function InteractiveLanding() {
                     "linear-gradient(to right, black 0%, black calc(100% - 80px), transparent 100%)",
                 }}
               >
-                {/* pt-3 inside the scroll container gives the coin badges (top: -4px) clearance,
-                    since `overflow-x: auto` forces the browser to clip overflow-y too. */}
-                <div className="flex gap-5 overflow-x-auto no-scrollbar pt-3">
-                  {ACTIVITY_MEMBERS.map((m, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 w-[135px]">
-                      <div className="relative w-[135px] h-[70px] flex items-center justify-center">
-                        <div className="h-[70px] w-[70px] rounded-full overflow-hidden ring-[3px] ring-white">
-                          <img src={avatarUrl(m.avatar, 140)} alt={m.name} className="h-full w-full object-cover" />
-                        </div>
-                        {/* Gold XP badge */}
-                        <div
-                          className="absolute h-8 w-8 rounded-full grid place-items-center ring-[3px] ring-white"
-                          style={{
-                            background: "linear-gradient(135deg, #ffca17 0%, #977400 100%)",
-                            top: "-4px",
-                            left: "16px",
-                          }}
-                        >
-                          <div className="absolute inset-[1.5px] rounded-full border border-black/30 pointer-events-none" />
-                          <span className="font-display font-bold text-white text-[11px] leading-none relative">{m.points}</span>
-                        </div>
-                        {/* Flag */}
-                        <div
-                          className="absolute h-8 w-8 rounded-full overflow-hidden ring-[3px] ring-white bg-white"
-                          style={{ bottom: "-4px", right: "16px" }}
-                        >
-                          <img
-                            src={flagUrl(m.flag)}
-                            alt={m.flag.toUpperCase()}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex flex-col items-center text-center">
-                        {/* Boosted members get a mauve pill with a boxed-star badge next to their name (per Figma — e.g. Max) */}
-                        {m.boosted ? (
-                          <div className="inline-flex items-center gap-1.5 bg-mauve rounded-full pl-2 pr-1.5 py-0.5">
-                            <span className="font-display font-medium text-sm text-white">{m.name}</span>
-                            <BoxedStar size={14} />
+                {/* Continuously drifting band. The track holds two identical
+                    copies of the list and slides exactly one copy-width, so the
+                    loop is seamless. Hovering pauses it; `prefers-reduced-motion`
+                    stops it and restores manual scrolling (see globals.css).
+                    pt-3 gives the coin badges (top: -4px) clearance. */}
+                <div className="marquee-viewport no-scrollbar pt-3">
+                  <div className="marquee-track">
+                    {[0, 1].map((copy) => (
+                      <div key={copy} className="flex gap-5 pr-5" aria-hidden={copy === 1}>
+                        {ACTIVITY_MEMBERS.map((m, i) => (
+                          <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 w-[135px]">
+                            <div className="relative w-[135px] h-[70px] flex items-center justify-center">
+                              <div className="h-[70px] w-[70px] rounded-full overflow-hidden ring-[3px] ring-white">
+                                <img src={avatarUrl(m.avatar, 140)} alt={m.name} className="h-full w-full object-cover" />
+                              </div>
+                              {/* Gold XP badge — value ticks up live */}
+                              <div
+                                className={`absolute h-8 w-8 rounded-full grid place-items-center ring-[3px] ring-white transition-transform duration-300 ${
+                                  flashIndex === i ? "scale-125" : ""
+                                }`}
+                                style={{
+                                  background: "linear-gradient(135deg, #ffca17 0%, #977400 100%)",
+                                  top: "-4px",
+                                  left: "16px",
+                                }}
+                              >
+                                <div className="absolute inset-[1.5px] rounded-full border border-black/30 pointer-events-none" />
+                                <span className="font-display font-bold text-white text-[11px] leading-none relative">
+                                  {memberPoints[i]}
+                                </span>
+                              </div>
+                              {/* Flag */}
+                              <div
+                                className="absolute h-8 w-8 rounded-full overflow-hidden ring-[3px] ring-white bg-white"
+                                style={{ bottom: "-4px", right: "16px" }}
+                              >
+                                <img
+                                  src={flagUrl(m.flag)}
+                                  alt={m.flag.toUpperCase()}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                            </div>
+                            <div className="w-full flex flex-col items-center text-center">
+                              {/* Boosted members get a mauve pill with a boxed-star badge next to their name (per Figma — e.g. Max) */}
+                              {m.boosted ? (
+                                <div className="inline-flex items-center gap-1.5 bg-mauve rounded-full pl-2 pr-1.5 py-0.5">
+                                  <span className="font-display font-medium text-sm text-white">{m.name}</span>
+                                  <BoxedStar size={14} />
+                                </div>
+                              ) : (
+                                <div className="font-display font-medium text-sm text-black px-1 py-0.5">{m.name}</div>
+                              )}
+                              <div className="font-display font-semibold text-[13px] text-black leading-snug px-1">
+                                Earn points for {m.desc}
+                              </div>
+                              <div className="font-display font-medium text-xs text-black/60 mt-1">{m.time}</div>
+                            </div>
                           </div>
-                        ) : (
-                          <div className="font-display font-medium text-sm text-black px-1 py-0.5">{m.name}</div>
-                        )}
-                        <div className="font-display font-semibold text-[13px] text-black leading-snug px-1">
-                          Earn points for {m.desc}
-                        </div>
-                        <div className="font-display font-medium text-xs text-black/60 mt-1">{m.time}</div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -652,7 +798,7 @@ export default function InteractiveLanding() {
                     <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-mauve">
                       <img src={avatarUrl("you", 72)} alt="You" className="h-full w-full object-cover" />
                     </div>
-                    <span className="font-display font-bold text-sm text-mauve">You</span>
+                    <span className="font-display font-bold text-sm text-mauve">{signedIn ? displayName : "You"}</span>
                     <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
                       <img src={flagUrl("fr")} alt="FR" className="h-full w-full object-cover" />
                     </div>
@@ -793,12 +939,27 @@ export default function InteractiveLanding() {
                               className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white text-center mt-auto outline-none focus:ring-2 focus:ring-white/60"
                             />
                           ) : (
-                            <button
-                              onClick={() => fireToast(`${card.cta} - check back soon!`)}
-                              className="w-full py-3 rounded-full font-display font-bold text-sm transition bg-mauve text-white hover:bg-mauve-600 mt-auto"
-                            >
-                              {card.cta}
-                            </button>
+                            (() => {
+                              const isCheckIn = card.action === "checkin";
+                              const done = isCheckIn && checkedIn;
+                              return (
+                                <button
+                                  onClick={() => handleActivityCta(card)}
+                                  disabled={done || (isCheckIn && checkingIn)}
+                                  className={`w-full py-3 rounded-full font-display font-bold text-sm transition mt-auto ${
+                                    done
+                                      ? "bg-white text-mauve ring-2 ring-mauve cursor-default"
+                                      : "bg-mauve text-white hover:bg-mauve-600 disabled:opacity-60"
+                                  }`}
+                                >
+                                  {done
+                                    ? "✓ You're all checked in"
+                                    : isCheckIn && checkingIn
+                                      ? "Checking you in…"
+                                      : card.cta}
+                                </button>
+                              );
+                            })()
                           )}
                         </>
                       )}
@@ -990,19 +1151,85 @@ export default function InteractiveLanding() {
           link your apps and use these hashtags so we can reward your fandom <span className="text-mauve font-semibold">#EJAE</span> <span className="text-mauve font-semibold">#TimeAfterTime</span>
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* ─── Spotify: a real OAuth connection, not a handle field ───
+               Once connected, /api/spotify/scan reads recently-played and turns
+               each play into points. TikTok and Instagram below stay manual —
+               neither platform will tell a third party that you posted with a
+               hashtag without a reviewed app. */}
+          <div
+            className={`group bg-white rounded-[32px] flex flex-col items-center justify-center py-10 px-5 shadow-card transition-all relative ${
+              spotify.connected ? "ring-2 ring-success/50" : "hover:shadow-card-lg"
+            }`}
+          >
+            {spotify.connected && (
+              <span className="absolute top-3 right-3 h-6 w-6 rounded-full bg-success text-white text-xs grid place-items-center" title="Connected">
+                ✓
+              </span>
+            )}
+            <img
+              src="/images/icons/spotify.svg"
+              alt="Spotify"
+              className="h-20 w-20 sm:h-24 sm:w-24 transition-transform group-hover:scale-110"
+            />
+            <div className="font-display font-bold text-base text-black mt-3">Spotify</div>
+
+            {spotify.connected ? (
+              <>
+                <div className="font-display font-medium text-xs text-success mt-1">
+                  Connected · tracking your plays
+                </div>
+                {spotify.recent?.length > 0 && (
+                  <div className="mt-3 w-full space-y-1.5">
+                    {spotify.recent.slice(0, 3).map((track, i) => (
+                      <div key={i} className="flex items-center gap-2 text-left">
+                        {track.image && (
+                          <img src={track.image} alt="" className="h-7 w-7 rounded shrink-0 object-cover" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="font-display font-semibold text-[11px] text-black truncate">{track.name}</div>
+                          <div className="font-display text-[10px] text-black/50 truncate">{track.artists}</div>
+                        </div>
+                        {track.isArtist && (
+                          <span className="font-display font-bold text-[10px] text-mauve shrink-0">+25</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {spotify.recent?.length === 0 && (
+                  <div className="font-display font-medium text-[11px] text-black/50 mt-1 text-center">
+                    Play something and your points appear here.
+                  </div>
+                )}
+              </>
+            ) : signedIn ? (
+              <>
+                <a
+                  href="/api/spotify/connect"
+                  className="mt-3 inline-flex items-center px-5 py-2 rounded-full bg-mauve text-white font-display font-bold text-xs hover:bg-mauve-600 transition"
+                >
+                  {spotify.loading ? "Checking…" : "Connect Spotify"}
+                </a>
+                <div className="font-display font-medium text-[11px] text-black/50 mt-2 text-center">
+                  +5XP a play · +25XP for an EJAE track
+                </div>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login?next=/"
+                  className="mt-3 inline-flex items-center px-5 py-2 rounded-full bg-mauve text-white font-display font-bold text-xs hover:bg-mauve-600 transition"
+                >
+                  Sign in to connect
+                </Link>
+                <div className="font-display font-medium text-[11px] text-black/50 mt-2 text-center">
+                  +5XP a play · +25XP for an EJAE track
+                </div>
+              </>
+            )}
+          </div>
+
           {[
-            {
-              key: "spotify",
-              name: "Spotify",
-              placeholder: "yourusername",
-              icon: (
-                <img
-                  src="/images/icons/spotify.svg"
-                  alt="Spotify"
-                  className="h-20 w-20 sm:h-24 sm:w-24 transition-transform group-hover:scale-110"
-                />
-              ),
-            },
             {
               key: "tiktok",
               name: "TikTok",

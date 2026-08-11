@@ -17,22 +17,31 @@ export default function SignupPage() {
   async function onSubmit(e) {
     e.preventDefault();
     setErr(null); setMsg(null); setLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email, password,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
-        data: { display_name: displayName },
-      },
+
+    // Create the account server-side (pre-confirmed), then sign straight in.
+    // No confirmation-email round trip.
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, displayName }),
     });
-    setLoading(false);
-    if (error) return setErr(error.message);
-    if (data.session) {
-      router.push("/dashboard");
-      router.refresh();
-    } else {
-      setMsg("Check your email for a confirmation link.");
+    const result = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      setLoading(false);
+      return setErr(result.error || "Could not create your account. Please try again.");
     }
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      setMsg("Account created! Please sign in.");
+      return;
+    }
+
+    router.push("/");
+    router.refresh();
   }
 
   return (

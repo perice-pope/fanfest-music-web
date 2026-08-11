@@ -9,11 +9,11 @@ export async function GET(request) {
   const state = searchParams.get("state");
   const error = searchParams.get("error");
 
-  if (error) return NextResponse.redirect(`${origin}/dashboard?spotify_error=${encodeURIComponent(error)}`);
+  if (error) return NextResponse.redirect(`${origin}/?spotify_error=${encodeURIComponent(error)}`);
 
   const expected = cookies().get("sp_oauth_state")?.value;
   if (!code || !state || state !== expected) {
-    return NextResponse.redirect(`${origin}/dashboard?spotify_error=state_mismatch`);
+    return NextResponse.redirect(`${origin}/?spotify_error=state_mismatch`);
   }
   cookies().delete("sp_oauth_state");
 
@@ -39,8 +39,8 @@ export async function GET(request) {
       updated_at: new Date().toISOString(),
     }, { onConflict: "user_id" });
 
-    return NextResponse.redirect(`${origin}/dashboard?spotify=connected`);
+    return NextResponse.redirect(`${origin}/?spotify=connected`);
   } catch (e) {
-    return NextResponse.redirect(`${origin}/dashboard?spotify_error=${encodeURIComponent(e.message)}`);
+    return NextResponse.redirect(`${origin}/?spotify_error=${encodeURIComponent(e.message)}`);
   }
 }

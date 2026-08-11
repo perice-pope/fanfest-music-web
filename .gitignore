@@ -8,3 +8,6 @@ npm-debug.log*
 
 # Figma design reference assets — keep local, not in repo
 FanFest - (Figma images)/
+
+# Supabase CLI link state
+supabase/.temp/
