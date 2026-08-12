@@ -503,27 +503,52 @@ export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
                        Mobile (Figma 107:7363): avatar + PIERRE name on left, XP coin + 75% pill on right.
                        Desktop: avatar pill on left, Join Fan Club CTA on right. */}
                   <div className="flex items-center justify-between gap-3">
-                    <Link href="/profile" className="inline-flex items-center gap-3 group">
+                    {/* Signed in: real avatar + name, links to the profile.
+                        Signed out: a neutral placeholder that says so — no borrowed
+                        identity, no fake stats. */}
+                    <Link
+                      href={signedIn ? "/profile" : "/login?next=/"}
+                      className="inline-flex items-center gap-3 group"
+                    >
                       <div className="h-[50px] w-[50px] rounded-full bg-mauve grid place-items-center shrink-0">
-                        <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-figmaGray">
-                          <img src="/images/users/pierre.png" alt="Pierre" className="h-full w-full object-cover" />
-                        </div>
+                        {signedIn ? (
+                          <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-figmaGray">
+                            <img src="/images/users/pierre.png" alt={displayName} className="h-full w-full object-cover" />
+                          </div>
+                        ) : (
+                          <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                        )}
                       </div>
                       <div className="flex flex-col justify-center">
-                        <span className="font-display font-medium text-sm text-black md:text-white leading-tight uppercase tracking-wide md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">{displayName}</span>
-                        {/* "View Profile" only on desktop per Figma mobile mockup */}
-                        <span className="hidden md:inline font-display font-medium text-[13px] text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">View Profile</span>
+                        <span className="font-display font-medium text-sm text-black md:text-white leading-tight uppercase tracking-wide md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+                          {signedIn ? displayName : "Guest"}
+                        </span>
+                        <span className="hidden md:inline font-display font-medium text-[13px] text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+                          {signedIn ? "View Profile" : "Sign in to start earning XP"}
+                        </span>
                       </div>
                     </Link>
 
-                    {/* Mobile-only: XP coin pill + 75% percent pill on the right of PIERRE */}
-                    <div className="flex md:hidden items-center gap-2">
-                      <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
-                        <GoldCoin size={16} />
-                        <span className={`font-display font-semibold text-[13px] text-black inline-block ${pulsing ? "xp-pulse" : ""}`}>{formattedXp}XP</span>
+                    {/* Mobile-only: live XP + progress when signed in, a sign-in CTA when not */}
+                    {signedIn ? (
+                      <div className="flex md:hidden items-center gap-2">
+                        <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
+                          <GoldCoin size={16} />
+                          <span className={`font-display font-semibold text-[13px] text-black inline-block ${pulsing ? "xp-pulse" : ""}`}>{formattedXp}XP</span>
+                        </div>
+                        <span className="inline-flex items-center bg-white rounded-full px-3 py-1 font-display font-semibold text-[13px] text-black">75%</span>
                       </div>
-                      <span className="inline-flex items-center bg-white rounded-full px-3 py-1 font-display font-semibold text-[13px] text-black">75%</span>
-                    </div>
+                    ) : (
+                      <Link
+                        href="/signup"
+                        className="md:hidden inline-flex items-center bg-white text-mauve rounded-full px-4 py-2 font-display font-bold text-[13px] uppercase tracking-wide shrink-0"
+                      >
+                        Join
+                      </Link>
+                    )}
 
                     {/* Desktop-only: Join CTA when signed out, live XP when signed in */}
                     {signedIn ? (
@@ -546,23 +571,32 @@ export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
                   {/* Stats sections — desktop is 3 columns, mobile is stacked vertical sections.
                        Each section: title + status pill (side-by-side on mobile, stacked on desktop), then action button. */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-4 mt-auto">
-                    {/* SECTION 1: TOTAL XP EARNED — on mobile, only shows the Invite friends button (xp/quests are in the PIERRE row above) */}
+                    {/* SECTION 1: TOTAL XP EARNED — real balance when signed in; signed out
+                         this becomes the pitch rather than someone else's stats. */}
                     <div className="flex flex-col gap-3">
                       <div className="hidden md:flex md:flex-col md:gap-3">
-                        <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Total XP earned</div>
-                        <div className="flex items-center gap-3">
-                          <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
-                            <GoldCoin size={16} />
-                            <span className={`font-display font-semibold text-[13px] text-black inline-block ${pulsing ? "xp-pulse" : ""}`}>{formattedXp}XP</span>
-                          </div>
-                          <div className="flex items-center bg-white rounded-full p-[2px] h-8 w-[244px] max-w-full">
-                            <div className="flex items-center justify-start bg-mauve rounded-full pl-[2px] pr-3 py-[2px] h-full" style={{ width: "calc(100% * 0.85)" }}>
-                              <span className="inline-flex items-center justify-center bg-mauve-200 rounded-full h-full px-3 font-display font-semibold text-[13px] text-black whitespace-nowrap">
-                                4/5 Quests Completed
-                              </span>
+                        <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">
+                          {signedIn ? "Total XP earned" : "Earn XP"}
+                        </div>
+                        {signedIn ? (
+                          <div className="flex items-center gap-3">
+                            <div className="inline-flex items-center gap-1 bg-white rounded-full pl-1 pr-2.5 py-1">
+                              <GoldCoin size={16} />
+                              <span className={`font-display font-semibold text-[13px] text-black inline-block ${pulsing ? "xp-pulse" : ""}`}>{formattedXp}XP</span>
+                            </div>
+                            <div className="flex items-center bg-white rounded-full p-[2px] h-8 w-[244px] max-w-full">
+                              <div className="flex items-center justify-start bg-mauve rounded-full pl-[2px] pr-3 py-[2px] h-full" style={{ width: "calc(100% * 0.85)" }}>
+                                <span className="inline-flex items-center justify-center bg-mauve-200 rounded-full h-full px-3 font-display font-semibold text-[13px] text-black whitespace-nowrap">
+                                  4/5 Quests Completed
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="font-display font-medium text-[13px] text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] max-w-[260px]">
+                            Stream, check in, and play trivia to climb the leaderboard.
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={handleInvite}
@@ -576,14 +610,17 @@ export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
                       </button>
                     </div>
 
-                    {/* SECTION 2: MEMBERSHIP / WALLET — title (left) + VIP pill (right) on same row, button below */}
+                    {/* SECTION 2: MEMBERSHIP / WALLET — the VIP pill is a claim about the
+                         viewer, so it only appears for a signed-in member. */}
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
                         <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Membership / Wallet</div>
-                        <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1.5 pr-2.5 py-1">
-                          <BoxedStar size={16} />
-                          <span className="font-display font-semibold text-[13px] text-black">VIP</span>
-                        </div>
+                        {signedIn && (
+                          <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1.5 pr-2.5 py-1">
+                            <BoxedStar size={16} />
+                            <span className="font-display font-semibold text-[13px] text-black">VIP</span>
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={() => setWalletOpen(true)}
@@ -593,14 +630,16 @@ export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
                       </button>
                     </div>
 
-                    {/* SECTION 3: SUPERFAN+ — title (left) + ACTIVE pill (right) on same row, button below */}
+                    {/* SECTION 3: SUPERFAN+ — likewise, "ACTIVE" is only true of a member. */}
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-3">
                         <div className="font-display font-semibold text-[15px] text-black md:text-white uppercase tracking-wide">Superfan+</div>
-                        <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1">
-                          <img src="/images/icons/active-coin.png" alt="" className="h-4 w-4" />
-                          <span className="font-display font-semibold text-[13px] text-black">ACTIVE</span>
-                        </div>
+                        {signedIn && (
+                          <div className="inline-flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1">
+                            <img src="/images/icons/active-coin.png" alt="" className="h-4 w-4" />
+                            <span className="font-display font-semibold text-[13px] text-black">ACTIVE</span>
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={() => setBenefitsOpen(true)}
@@ -789,24 +828,45 @@ export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
                   );
                 })}
 
-                {/* You row (always last, mauve background) — rank changes per active tab */}
-                <div className="flex items-center gap-4 px-5 sm:px-7 py-4 bg-figmaGray">
-                  <div className="h-9 w-9 rounded-full bg-mauve grid place-items-center text-white font-display font-bold text-base shrink-0">
-                    {YOU_RANK[leaderboardTab]}
-                  </div>
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-mauve">
-                      <img src={avatarUrl("you", 72)} alt="You" className="h-full w-full object-cover" />
+                {/* Your row (always last). Signed in it's a real rank and a real
+                    balance; signed out there is no "you" yet, so it becomes an
+                    invitation instead of a fabricated standing. */}
+                {signedIn ? (
+                  <div className="flex items-center gap-4 px-5 sm:px-7 py-4 bg-figmaGray">
+                    <div className="h-9 w-9 rounded-full bg-mauve grid place-items-center text-white font-display font-bold text-base shrink-0">
+                      {YOU_RANK[leaderboardTab]}
                     </div>
-                    <span className="font-display font-bold text-sm text-mauve">{signedIn ? displayName : "You"}</span>
-                    <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
-                      <img src={flagUrl("fr")} alt="FR" className="h-full w-full object-cover" />
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-mauve">
+                        <img src={avatarUrl("you", 72)} alt={displayName} className="h-full w-full object-cover" />
+                      </div>
+                      <span className="font-display font-bold text-sm text-mauve">{displayName}</span>
+                      <div className="h-4 w-4 rounded-full overflow-hidden ring-1 ring-black/10 shrink-0">
+                        <img src={flagUrl("fr")} alt="FR" className="h-full w-full object-cover" />
+                      </div>
+                      {/* Boxed star badge (matches Figma — gradient box with star inside) */}
+                      <BoxedStar size={16} />
                     </div>
-                    {/* Boxed star badge next to You (matches Figma — gradient box with star inside) */}
-                    <BoxedStar size={16} />
+                    <span className="font-display font-bold text-base text-black shrink-0">{formattedXp}</span>
                   </div>
-                  <span className="font-display font-bold text-base text-black shrink-0">{formattedXp}</span>
-                </div>
+                ) : (
+                  <Link
+                    href="/signup"
+                    className="flex items-center gap-4 px-5 sm:px-7 py-4 bg-figmaGray hover:bg-mauve/10 transition group"
+                  >
+                    <div className="h-9 w-9 rounded-full bg-mauve/20 grid place-items-center text-mauve font-display font-bold text-lg shrink-0">
+                      ?
+                    </div>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="font-display font-bold text-sm text-mauve">
+                        Join to claim your spot on the leaderboard
+                      </span>
+                    </div>
+                    <span className="font-display font-bold text-sm text-mauve shrink-0 group-hover:translate-x-0.5 transition-transform">
+                      Sign up &rarr;
+                    </span>
+                  </Link>
+                )}
               </div>
 
               <div className="px-5 sm:px-7 py-4 border-t border-mauve/30">
@@ -1328,42 +1388,76 @@ export default function InteractiveLanding({ fan = null, demoXp = 1500 }) {
               Membership / Add to Wallet
             </h2>
 
-            {/* Current plan card */}
+            {/* Current plan card — a plan and a join date are claims about the
+                viewer, so signed out this states there's no membership yet. */}
             <div className="mt-6 bg-white rounded-2xl p-5">
               <div className="flex items-center justify-between">
                 <h3 className="font-display font-bold text-lg text-mauve">Current Plan</h3>
-                <span className="inline-flex items-center gap-1.5 bg-figmaGray rounded-full pl-1.5 pr-2.5 py-1">
-                  <BoxedStar size={14} />
-                  <span className="font-display font-semibold text-[13px] text-mauve">SUPERFAN+</span>
-                </span>
+                {signedIn && (
+                  <span className="inline-flex items-center gap-1.5 bg-figmaGray rounded-full pl-1.5 pr-2.5 py-1">
+                    <BoxedStar size={14} />
+                    <span className="font-display font-semibold text-[13px] text-mauve">SUPERFAN+</span>
+                  </span>
+                )}
               </div>
-              <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">Active member since March 2026.</p>
+              <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">
+                {signedIn
+                  ? "Active member since March 2026."
+                  : "You're not a member yet — join FanFest to start your membership."}
+              </p>
             </div>
 
             {/* Wallet balance card */}
             <div className="mt-3 bg-white rounded-2xl p-5">
               <h3 className="font-display font-bold text-lg text-mauve">Wallet Balance</h3>
-              <div className="mt-2 flex items-center gap-2">
-                <GoldCoin size={20} />
-                <span className="font-display font-bold text-2xl text-mauve">{formattedXp}<span className="text-base font-semibold">XP</span></span>
-              </div>
-              <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">Top up your wallet to unlock rewards faster.</p>
+              {signedIn ? (
+                <>
+                  <div className="mt-2 flex items-center gap-2">
+                    <GoldCoin size={20} />
+                    <span className="font-display font-bold text-2xl text-mauve">{formattedXp}<span className="text-base font-semibold">XP</span></span>
+                  </div>
+                  <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">Top up your wallet to unlock rewards faster.</p>
+                </>
+              ) : (
+                <p className="font-display font-medium text-sm text-mauve/80 mt-2 leading-snug">
+                  Sign in to see your XP balance.
+                </p>
+              )}
             </div>
 
             {/* CTAs */}
             <div className="mt-5 flex flex-col gap-2.5">
-              <button
-                onClick={() => { setWalletOpen(false); fireToast("Top-up flow coming soon!"); }}
-                className="w-full py-3 rounded-full bg-mauve text-white font-display font-bold text-sm hover:bg-mauve-600 transition"
-              >
-                Top up XP
-              </button>
-              <button
-                onClick={() => { setWalletOpen(false); setBenefitsOpen(true); }}
-                className="w-full py-3 rounded-full bg-white text-mauve font-display font-bold text-sm hover:bg-white/90 transition"
-              >
-                Change to Free
-              </button>
+              {signedIn ? (
+                <>
+                  <button
+                    onClick={() => { setWalletOpen(false); fireToast("Top-up flow coming soon!"); }}
+                    className="w-full py-3 rounded-full bg-mauve text-white font-display font-bold text-sm hover:bg-mauve-600 transition"
+                  >
+                    Top up XP
+                  </button>
+                  <button
+                    onClick={() => { setWalletOpen(false); setBenefitsOpen(true); }}
+                    className="w-full py-3 rounded-full bg-white text-mauve font-display font-bold text-sm hover:bg-white/90 transition"
+                  >
+                    Change to Free
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/signup"
+                    className="w-full py-3 rounded-full bg-mauve text-white font-display font-bold text-sm hover:bg-mauve-600 transition text-center"
+                  >
+                    Join FanFest
+                  </Link>
+                  <button
+                    onClick={() => { setWalletOpen(false); setBenefitsOpen(true); }}
+                    className="w-full py-3 rounded-full bg-white text-mauve font-display font-bold text-sm hover:bg-white/90 transition"
+                  >
+                    See Benefits
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
